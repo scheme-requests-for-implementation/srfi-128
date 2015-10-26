@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML//EN">
+<!-- saved from url=(0043)http://srfi.schemers.org/srfi-template.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>SRFI 128: Comparators (reduced)</title>
+  <style>#content > #right > .dose > .dosesingle,
+#content > #center > .dose > .dosesingle
+{display:none !important;}</style></head>
+
+  <body>
+
+<h1>Title</h1>
+
+Comparators (reduced)
+
+<h1>Author</h1>
+
+John Cowan
+
+<h1>Abstract</h1>
+
+<p>
+This SRFI provides <i>comparators</i>, procedure bundles that represent one or more of an equality predicate, an ordering predicate, and a hash function.  By packaging these procedures together, along with a type test predicate, they can be treated as a single item for use in the implementation of data structures.
+</p>
+
+<h1>Issues</h1>
+
+None at present.
+
+
+<h1>Rationale</h1>
+
+<p>
+The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, an ordering predicate is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
+</p>
+<p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
+
+<p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence that SRFI 114 was over-complicated but also inadequate inspired this redesign.</p>
+
+
+<h1>Specification</h1>
+
+p>The procedures in this SRFI are in the <code>(srfi 128)</code> library (or <code>(srfi :128)</code> on R6RS), but the sample implementation currently places them in the <code>(comparators)</code> library.  This means it can't be used alongside SRFI 114, but there's no reason for anyone to do that.</p>
+
+<h3 id="Definitions">Definitions</h3>
+<p>
+A <em>comparator</em> is an object of a disjoint type.  It is a bundle of procedures that are useful for comparing two objects either for equality or for ordering.  There are four procedures in the bundle:
+</p>
+<ul><li><p>The <em>type test predicate</em> returns <code>#t</code> if its argument has the correct type to be passed as an argument to the other three procedures, and <code>#f</code> otherwise.</p>
+</li>
+<li><p>The <em>equality predicate</em> returns <code>#t</code> if the two objects are the same in the sense of the comparator, and <code>#f</code> otherwise.  It is the programmer's responsibility to ensure that it is reflexive, symmetric, transitive, and can handle any arguments that satisfy the type test predicate.</p>
+</li>
+<li><p>The <em>ordering predicate</em> returns <code>#t</code> if the first object precedes the second in a total order, and <code>#f</code> otherwise.  Note that if it is true, the equality predicate must be false.  It is the programmer's responsibility to ensure that it is irreflexive, asymmetric, transitive, and can handle any arguments that satisfy the type test predicate.</p>
+</li>
+<li><p>The <em>hash function</em> takes one or more arguments and returns an exact non-negative integer; the first argument is the object to be hashed.  It is the programmer's responsibility to ensure that it can handle any argument that satisfies the type test predicate, and that it returns the same value on two objects if the equality predicate says they are the same (but not necessarily the converse).</p>
+
+<p>If a second argument is provided, it is a non-negative exact integer, a hint from the caller of the hash function that the returned value should be bounded from above by the second argument.  There is no requirement that a hash
+function support this hint, and the caller cannot count on its being applied.  Supplying <code>#f</code>
+as the second argument is equivalent to providing no argument.</p>
+
+<p>If a third argument is provided, it is a positive exact integer that serves as a <i>salt</i> value to be mixed in along with the first argument when performing the hash calculation.  If the caller is careful to provide a sufficiently random salt, attacks on the hash function become more difficult.  In addition, callers that need more than one hash function can easily obtain it by varying the salt.  Like the upper bound, the salt is a hint: no hash function is required to make use of it.</p>  
+</li></ul>
+<p>
+It is also the programmer's responsibility to ensure that all four procedures provide the same result whenever they are applied to the same object(s) (in the sense of <code>eqv?</code>), unless the object(s) have been mutated since the last invocation.  In particular, they must not depend in any way on memory addresses in implementations where the garbage collector can move objects in memory.
+</p>
+<h3>Limitations</h3>
+<p>The comparator objects defined in this SRFI are not applicable to circular structure or to NaNs, or to objects containing any of these.  Attempts to pass any such objects to any procedure defined here, or to any procedure that is part of a comparator defined here, is an error except as otherwise noted.</p>
+<h3>Index</h3>
+<ul>
+<li><p><a href="#Predicates">Predicates</a>: <code>comparator?, comparator-ordered?, comparator-hashable?</code></p></li>
+<li><p><a href="#Constructors">Constructors</a>: <code>make-comparator,  make-pair-comparator, make-list-comparator, make-vector-comparator, make-eq-comparator, make-eqv-comparator, make-equal-comparator</code></p></li>
+<li><p><a href="Hashfunctions">Standard hash functions</a>: <code>boolean-hash, char-hash, char-ci-hash, string-hash, string-ci-hash, symbol-hash, number-hash</code></p></li>
+<li><p><a href="#Defaultcomparators">Default comparators</a>: <code>default-comparator, comparator-register-default!</code></p></li>
+<li><p><a href="#Accessors">Accessors</a>: <code>comparator-type-test-procedure, comparator-equality-predicate, comparator-ordering-predicate, comparator-hash-function, comparator-check-type</code></p></li>
+<li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=?, &lt;?, >?, &lt;=?, >=?</code></p></li>
+</ul>
+<h3 id="Predicates">Predicates</h3>
+<p>
+<code>(comparator? </code><em>obj</em><code>)</code>
+</p>
+<p>
+Returns <code>#t</code> if <em>obj</em> is a comparator, and <code>#f</code> otherwise.</p>
+<p><code>(comparator-ordered? </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns <code>#t</code> if <em>comparator</em> has a supplied ordering predicate, and <code>#f</code> otherwise.
+</p>
+<p><code>(comparator-hashable? </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns <code>#t</code> if <em>comparator</em> has a supplied hash function, and <code>#f</code> otherwise.
+</p>
+<h3 id="Constructors">Constructors</h3>
+<p>
+The following comparator constructors all supply appropriate type test functions, equality predicates, ordering predicates, and hash functions based on the supplied arguments.  They are allowed to cache their results: they need not return a newly allocated object, since comparators are pure and functional.
+</p></p>
+<p>
+<code>(make-comparator </code><em>type-test equality ordering hash</em><code>)</code>
+</p>
+<p>
+Returns a comparator which bundles the <em>type-test, equality, ordering</em>, and <em>hash</em> procedures provided.  As a convenience, if <em>ordering</em> or <em>hash</em> is <code>#f</code>, a procedure is provided that signals an error on application.  The predicates <code>comparator-ordered?</code> and/or <code>comparator-hashable?</code>, respectively, will return <code>#f</code> in these cases.
+</p>
+<p>Here are calls on <code>make-comparator</code> that will return useful comparators for standard Scheme types:
+<p>
+<ul>
+<li><p><code>(make-comparator boolean? boolean=? (lambda (x y) (and (not x) y)) (lambda (x) (if x 1 0)))</code> will return a comparator for booleans, expressing the ordering <code>#f</code> &lt; <code>#t</code> and a plausible hash function.</p></li>
+<li><p><code>(make-comparator real? = < (lambda (x) (exact (abs x))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
+<li><p><code>(make-comparator string? string=? string&lt;? string-hash)</code> will return a comparator expressing the implementation's ordering of strings.  On R5RS systems this is a lexicographic extension of some implementation-defined ordering of characters; on R6RS systems it is a lexicographic extension of Unicode codepoint order; on R7RS systems it is implementation-defined.</p></li>
+<li><p><code>(make-comparator string? string-ci=? string-ci&lt;? string-ci-hash</code> will return a comparator expressing the implementation's case-insensitive ordering of strings.</p></li>
+</ul>
+<p>
+<code>(make-pair-comparator </code> [ <var>car-comparator cdr-comparator</var> ]<code>)</code>
+</p>
+<p>This comparator compares pairs using <var>car-comparator</var> (a default comparator by default) on their cars. If the cars are not equal, that value is returned. If they are equal, <var>cdr-comparator</var> (also a default comparator by default) is used on their cdrs and that value is returned.  Hashing is done on both the car and cdr sides, and the results are hashed together.
+</p>
+<p><code>(make-list-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>empty? head tail</em> ] ]<code>)</code>
+</p>
+<p>
+Returns a comparator which lexicographically compares two sequences that satisfy <em>type-test</em> (<code>list</code> by default), as follows:</p>
+<ul>
+<li>The empty sequence, as determined by calling <var>empty?</var> (<code>null?</code> by default) compares equal to itself.</li>
+<li>The empty sequence compares less than any non-empty sequence.</li>
+<li>Two non-empty sequences are compared by comparing the result of calling the <var>head</var> procedure (<code>car</code> by default).  If the heads are not equal when compared using <var>element-comparator</var> (a default comparator by default), then the result is the result of that comparison.  Otherwise, the results of calling the <var>tail</var> procedure (<code>cdr</code> by default) are compared recursively.
+</li></ul>
+</p>
+<p>In particular, <code>(make-list-comparator)</code> returns a comparator that compares lists using a default comparator for the elements, and <code>(make-list-comparator </code><var>element-comparator</var></var><code>)</code> returns a comparator that compares lists using <var>element-comparator for the elements.</p>
+<p><code>(make-vector-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>length ref</em> ] ]<code>)</code>
+</p>
+<p>
+Returns a comparator which compares two sequences that satisfy <em>type-test</em> (<code>vector?</code> by default), using the <em>length</em> procedure (<code>vector-length</code> by default) to determine the lengths of the sequences, and the <em>ref</em> procedure (<code>vector-ref</code> by default) to access a particular elements.  If one sequence is shorter than the other, it compares less than the other.  If the sequences are the same length, they are compared element-wise using <var>element-comparator</var> (a default comparator by default) until they are exhausted.</p>
+<p>
+In particular, <code>(make-vector-comparator)</code> returns a comparator that compares vectors using a default comparator for the elements, and <code>(make-vector-comparator </code><var>element-comparator</var><code>)</code> returns a comparator that compares vectors using <var>element-comparator</var>.  Here is a more complex example returning a comparator that compares bytevectors as unsigned bytes:
+</p>
+<dl><dd>
+<pre>
+(make-vector-comparator
+  (make-comparator exact-integer? = < number-hash)
+  bytevector?
+  bytevector-length
+  bytevector-u8-ref)
+</pre>
+</dd></dl>
+
+<p>
+<code>(make-eq-comparator)</code>
+</p>
+<p>
+<code>(make-eqv-comparator)</code>
+</p>
+<p>
+<code>(make-equal-comparator)</code>
+</p>
+<p>
+The equality predicates of these comparators are <code>eq?</code>, <code>eqv?</code>, and <code>equal?</code> respectively.  When their ordering procedures are applied to non-equal objects, their behavior is implementation-defined.  The type test predicates always return <code>#t</code>.
+</p>
+<p>These comparators accept circular structure (in the case of
+<code>equal-comparator</code>, provided the implementation's <code>equal?</code> predicate
+does so) and NaNs.</p>
+
+<h3 id="Hashfunctions">Standard hash functions</h3>
+<p>These are hash functions for standard Scheme types, suitable for passing to <code>make-comparator</code>.
+</p>
+<p>
+<code>(boolean-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(char-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(char-ci-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(string-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(string-ci-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(symbol-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>
+<code>(number-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>These are suitable hash functions for the specified types. The hash functions <code>char-ci-hash</code> and <code>string-ci-hash</code> treat their first argument case-insensitively.
+</p>
+
+
+<h3 id="Defaultcomparators">Default comparators</h3>
+<p>
+<code>(make-default-comparator)</code>
+</p>
+<p>
+Returns a comparator known as a <var>default comparator</var> that accepts Scheme values and orders them in some implementation-defined way, subject to the following conditions:
+</p>
+<ul><li><p>The following arbitrary ordering between types must hold: the empty list precedes pairs, which precede booleans, which precede characters, which precede strings, which precede symbols, which precede numbers, which precede vectors, which precede bytevectors, which precede all other objects.</p></li>
+<li><p>When applied to pairs, it must behave the same as a comparator returned by <code>make-pair-comparator</code> when applied to no arguments.</p></li>
+<li><p>When applied to booleans, it must compare them using the total order <code>#f</code> &lt; <code>#t</code> and hash them using the hash function <code>boolean-hash</code>.</p></li>
+<li><p>When applied to characters, it must compare them using <code>char=?</code> and <code>char&lt;?</code>.  In R5RS, this is an implementation-dependent order that is typically the same as Unicode codepoint order; in R6RS and R7RS, it is Unicode codepoint order.  It must also hash them using the hash function <code>char-hash</code>.</p></li>
+<li><p>When applied to strings, it must compare them using <code>string=?</code> and <code>string&lt;?</code>.  In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order order on Unicode codepoint order; in R7RS it is an implementation-defined order.  It must also hash them using the hash function <code>string-hash</code>.</p></li>
+<li><p>When applied to symbols, it must compare them using an implementation-dependent total order.  One possibility is to use the order obtained applying <code>symbol-&gt;string</code> to the symbols and comparing them using the total order implied by <code>string&lt;?</code>.  It must also hash them using the hash function <code>symbol-hash</code>.  It is not a requirement that symbol hash functions be consistent with string hash functions, however.</p></li>
+<li><p>When applied to numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.  It must also hash them using the hash function<code>number-hash</code>.</p></li>
+<li><p>When applied to real numbers, it must compare them using <code>=</code> and <code>&lt;</code>, and hash them using the hash function <code>number-hash</code>.</p></li>
+<li><p>When applied to vectors, it must behave the same as a comparator returned by <code>make-vector-comparator</code> with default arguments.</p></li>
+<li><p>When applied to bytevectors, it must behave the same as a comparator created by <code>(make-vector-comparator (make-comparator < = (lambda (x) x)) bytevector? bytevector-length bytevector-u8-ref)</code>.</li>
+<li><p>When applied to types registered with <code>comparator-register-default!</code>: it must behave the same as the comparator registered using that function.</p></li>
+<li><p>Given disjoint types <em>a</em> and <em>b</em>, one of three conditions must hold:</p>
+<ul>
+<li>All objects of type <em>a</em> compare less than all objects of type <em>b</em>.</li>
+<li>All objects of type <em>a</em> compare greater than all objects of type <em>b</em>.</li>
+<li>All objects of either type <em>a</em> or type <em>b</em> compare equal to each other.  This is not permitted for any of the standard types listed above.</li>
+</ul>
+</p></li>
+</ul>
+<p><code>(comparator-register-default! </code><var>comparator</var><code>)</code>
+</p>
+<p>
+Registers <var>comparator</var> for use by default comparators, such that if the objects being compared
+both satisfy the type test predicate of <var>comparator</var>, it will be employed by default comparators
+to compare them.
+</p>
+</p>
+<h3 id="Accessors">Accessors</h3>
+<p>
+<code>(comparator-type-test-procedure </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns the type test predicate of <em>comparator</em>.
+</p>
+<p>
+<code>(comparator-equality-predicate </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns the equality predicate of <em>comparator</em>.
+</p>
+<p>
+<code>(comparator-ordering-predicate </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns the ordering predicate of <em>comparator</em>.
+</p>
+<p>
+<code>(comparator-hash-function </code><em>comparator</em><code>)</code>
+</p>
+<p>
+Returns the hash function of <em>comparator</em>.
+</p>
+<p>
+<code>(comparator-check-type </code><em>comparator obj</em><code>)</code>
+</p>
+<p>
+Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and returns true if it returns true and signals an error otherwise.
+</p>
+<h3 id="Comparisonpredicates">Comparison predicates</h3>
+<p>
+<code>(=? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
+</p>
+<p>
+<code>(&lt;? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
+</p>
+<p>
+<code>(&gt;? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
+</p>
+<p>
+<code>(&lt;=? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
+</p>
+<p>
+<code>(&gt;=? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
+</p>
+<p>
+These procedures are analogous to the number, character, and string comparison predicates of Scheme.  They allow the convenient use of comparators to handle arbitrary data types.</p>
+<p>These procedures apply the comparison procedure of <em>comparator</em> to the <em>objects</em> as follows.  If the specified relation returns <code>#t</code> for all <em>object<sub>i</sub></em> and <em>object<sub>j</sub></em> where <em>n</em> is the number of objects and 1 &lt;= <em>i &lt; j &lt;= n</em>, then the procedures return <code>#t</code>, but otherwise <code>#f</code>.</p>
+
+<p>
+The order in which the values are compared is unspecified.  Because the relations are transitive, it suffices to compare each object with its successor.
+</p>
+
+<h1>Implementation</h1>
+
+
+<p>The <a href="comparators.tar.gz">sample implementation</a> 
+is found in the repository of this SRFI.  It contains the following files.</p>
+<ul><li><code>comparators-impl.scm</code> - the record type definition and most of the procedures</li>
+<li><code>default.scm</code> - a simple implementation of the default constructor, which should be improved by implementers to handle records and implementation-specific types</li>
+<li><code>hash.scm</code> - built-in hash functions</li>
+<li><code>r7rs-shim.scm</code> - procedures for R7RS compatibility, including a trivial implementation of bytevectors on top of <a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI 4</a> u8vectors</li>
+<li><code>complex-shim.scm</code> - a trivial implementation of <code>real-part</code> and <code>imag-part</code> for Schemes that don't have complex numbers</li>
+<li><code>comparators.sld</code> - an R7RS library</li>
+<li><code>comparators.scm</code> - a Chicken library</li>
+<li><code>comparators-test.scm</code> - a test file using the Chicken <code>test</code> egg</li></ul>
+<a href="http://srfi.schemers.org/srfi%20minus%20???-reference.scm">Source for the reference implementation.</a>
+
+<h1>Copyright</h1>
+Copyright (C) John Cowan (2015). All Rights Reserved. 
+<p>
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+</p><p>
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+</p><p>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+    </p><hr>
+    <address>Editor: <a href="mailto:srfi-editors at srfi dot schemers dot org">Arthur C. Gleckler</a></address>
+<!-- Created: Tue Sep 29 19:20:08 EDT 1998 -->
+<!-- hhmts start -->
+Last modified: Sun Jan 28 14:21:14 MET 2007
+<!-- hhmts end -->
+  
+
+<div id="SL_balloon_obj" alt="0" style="display: block;"><div id="SL_button" class="ImTranslatorLogo" style="display: none; background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/imtranslator-s.png);"></div><div id="SL_shadow_translation_result2" style="display: none;"></div><div id="SL_shadow_translator"><div id="SL_planshet" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/bg2.png) rgb(244, 245, 245);"><div id="SL_TB"><div id="bubblelogo" class="ImTranslatorLogo" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/imtranslator-s.png);"></div><table id="SL_tables" cellspacing="1"><tr><td class="SL_td" width="10%" align="right"><input id="SLloc" type="checkbox" title="Lock-in language"></td><td class="SL_td" width="20%" align="left"><select id="SL_lng_from"><option value="auto">Detect language</option><option value="af">Afrikaans</option><option value="sq">Albanian</option><option value="ar">Arabic</option><option value="hy">Armenian</option><option value="az">Azerbaijani</option><option value="eu">Basque</option><option value="be">Belarusian</option><option value="bn">Bengali</option><option value="bs">Bosnian</option><option value="bg">Bulgarian</option><option value="ca">Catalan</option><option value="ceb">Cebuano</option><option value="ny">Chichewa</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="hr">Croatian</option><option value="cs">Czech</option><option value="da">Danish</option><option value="nl">Dutch</option><option value="en">English</option><option value="eo">Esperanto</option><option value="et">Estonian</option><option value="tl">Filipino</option><option value="fi">Finnish</option><option value="fr">French</option><option value="gl">Galician</option><option value="ka">Georgian</option><option value="de">German</option><option value="el">Greek</option><option value="gu">Gujarati</option><option value="ht">Haitian Creole</option><option value="ha">Hausa</option><option value="iw">Hebrew</option><option value="hi">Hindi</option><option value="hmn">Hmong</option><option value="hu">Hungarian</option><option value="is">Icelandic</option><option value="ig">Igbo</option><option value="id">Indonesian</option><option value="ga">Irish</option><option value="it">Italian</option><option value="ja">Japanese</option><option value="jw">Javanese</option><option value="kn">Kannada</option><option value="kk">Kazakh</option><option value="km">Khmer</option><option value="ko">Korean</option><option value="lo">Lao</option><option value="la">Latin</option><option value="lv">Latvian</option><option value="lt">Lithuanian</option><option value="mk">Macedonian</option><option value="mg">Malagasy</option><option value="ms">Malay</option><option value="ml">Malayalam</option><option value="mt">Maltese</option><option value="mi">Maori</option><option value="mr">Marathi</option><option value="mn">Mongolian</option><option value="my">Myanmar (Burmese)</option><option value="ne">Nepali</option><option value="no">Norwegian</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="pa">Punjabi</option><option value="ro">Romanian</option><option value="ru">Russian</option><option value="sr">Serbian</option><option value="st">Sesotho</option><option value="si">Sinhala</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="so">Somali</option><option value="es">Spanish</option><option value="su">Sundanese</option><option value="sw">Swahili</option><option value="sv">Swedish</option><option value="tg">Tajik</option><option value="ta">Tamil</option><option value="te">Telugu</option><option value="th">Thai</option><option value="tr">Turkish</option><option value="uk">Ukrainian</option><option value="ur">Urdu</option><option value="uz">Uzbek</option><option value="vi">Vietnamese</option><option value="cy">Welsh</option><option value="yi">Yiddish</option><option value="yo">Yoruba</option><option value="zu">Zulu</option></select></td><td class="SL_td" width="3" align="center"><div id="SL_switch_b" title="Switch languages" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/switchb.png);"></div></td><td class="SL_td" width="20%" align="left"><select id="SL_lng_to"><option value="af">Afrikaans</option><option value="sq">Albanian</option><option value="ar">Arabic</option><option value="hy">Armenian</option><option value="az">Azerbaijani</option><option value="eu">Basque</option><option value="be">Belarusian</option><option value="bn">Bengali</option><option value="bs">Bosnian</option><option value="bg">Bulgarian</option><option value="ca">Catalan</option><option value="ceb">Cebuano</option><option value="ny">Chichewa</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="hr">Croatian</option><option value="cs">Czech</option><option value="da">Danish</option><option value="nl">Dutch</option><option value="en">English</option><option value="eo">Esperanto</option><option value="et">Estonian</option><option value="tl">Filipino</option><option value="fi">Finnish</option><option value="fr">French</option><option value="gl">Galician</option><option value="ka">Georgian</option><option value="de">German</option><option value="el">Greek</option><option value="gu">Gujarati</option><option value="ht">Haitian Creole</option><option value="ha">Hausa</option><option value="iw">Hebrew</option><option value="hi">Hindi</option><option value="hmn">Hmong</option><option value="hu">Hungarian</option><option value="is">Icelandic</option><option value="ig">Igbo</option><option value="id">Indonesian</option><option value="ga">Irish</option><option value="it">Italian</option><option value="ja">Japanese</option><option value="jw">Javanese</option><option value="kn">Kannada</option><option value="kk">Kazakh</option><option value="km">Khmer</option><option value="ko">Korean</option><option value="lo">Lao</option><option value="la">Latin</option><option value="lv">Latvian</option><option value="lt">Lithuanian</option><option value="mk">Macedonian</option><option value="mg">Malagasy</option><option value="ms">Malay</option><option value="ml">Malayalam</option><option value="mt">Maltese</option><option value="mi">Maori</option><option value="mr">Marathi</option><option value="mn">Mongolian</option><option value="my">Myanmar (Burmese)</option><option value="ne">Nepali</option><option value="no">Norwegian</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="pa">Punjabi</option><option value="ro">Romanian</option><option value="ru">Russian</option><option value="sr">Serbian</option><option value="st">Sesotho</option><option value="si">Sinhala</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="so">Somali</option><option selected="selected" value="es">Spanish</option><option value="su">Sundanese</option><option value="sw">Swahili</option><option value="sv">Swedish</option><option value="tg">Tajik</option><option value="ta">Tamil</option><option value="te">Telugu</option><option value="th">Thai</option><option value="tr">Turkish</option><option value="uk">Ukrainian</option><option value="ur">Urdu</option><option value="uz">Uzbek</option><option value="vi">Vietnamese</option><option value="cy">Welsh</option><option value="yi">Yiddish</option><option value="yo">Yoruba</option><option value="zu">Zulu</option></select></td><td class="SL_td" width="5%" align="center"> </td><td class="SL_td" width="8%" align="center"><div id="SL_TTS_voice" title="Listen to the translation" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/tts-voice.png);"></div></td><td class="SL_td" width="8%" align="center"><div id="SL_copy" title="Copy translation" class="SL_copy" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/copy_hand.png);"></div></td><td class="SL_td" width="8%" align="center"><div id="SL_bbl_font_patch" onclick="alert(chrome.i18n.getMessage(&#39;extNot_available&#39;))"></div><div id="SL_bbl_font" title="Font size" class="SL_bbl_font" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/font-off.png);"></div></td><td class="SL_td" width="8%" align="center"><div id="SL_TH" title="Translation history" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/history.png);"></div></td><td class="SL_td" width="18%"></td><td class="SL_td" width="8%" align="right"><div id="SL_pin" title="Pin pop-up bubble" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/pin-on.png);"></div></td></tr></table></div></div><div id="SL_shadow_translation_result" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/bg.png) rgb(255, 255, 255);"></div><div id="SL_player2"></div><div id="SL_alert100" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/bg2.png);">Text-to-speech function is limited to 100 characters</div><div id="SL_bbl_donate" title="Make a small contribution" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/donate2.png);"></div><div id="SL_Balloon_options" style="background: url(chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/img/util/bg3.png) rgb(255, 255, 255);"><a href="chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/html/options/options-bbl.html" target="_blank" class="SL_options" title="Show options">Options</a> : <a href="chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/html/options/history.html" target="_blank" class="SL_options" title="Translation history">History</a> : <a href="http://about.imtranslator.net/tutorials/presentations/imtranslator-for-chrome/chrome-bubble-translator/" target="_blank" class="SL_options" title="ImTranslator Help">Help</a> : <a href="chrome-extension://noaijdpnepcgjemiklgfkcfbkokogabh/content/html/options/feedback.html" target="_blank" class="SL_options" title="ImTranslator Feedback">Feedback</a><span id="SL_Balloon_Close" title="Close">Close</span></div></div></div></body></html>
