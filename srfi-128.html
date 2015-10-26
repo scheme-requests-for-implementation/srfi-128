@@ -132,7 +132,7 @@ Returns a comparator which lexicographically compares two sequences that satisfy
 <li>Two non-empty sequences are compared by comparing the result of calling the <var>head</var> procedure (<code>car</code> by default).  If the heads are not equal when compared using <var>element-comparator</var> (a default comparator by default), then the result is the result of that comparison.  Otherwise, the results of calling the <var>tail</var> procedure (<code>cdr</code> by default) are compared recursively.
 </li></ul>
 </p>
-<p>In particular, <code>(make-list-comparator)</code> returns a comparator that compares lists using a default comparator for the elements, and <code>(make-list-comparator </code><var>element-comparator</var></var><code>)</code> returns a comparator that compares lists using <var>element-comparator for the elements.</p>
+<p>In particular, <code>(make-list-comparator)</code> returns a comparator that compares lists using a default comparator for the elements, and <code>(make-list-comparator </code><var>element-comparator</var><code>)</code> returns a comparator that compares lists using <var>element-comparator</var> for the elements.</p>
 <p><code>(make-vector-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>length ref</em> ] ]<code>)</code>
 </p>
 <p>
