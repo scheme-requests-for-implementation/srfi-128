@@ -34,7 +34,10 @@ This SRFI provides <i>comparators</i>, procedure bundles that represent one or m
 
 <h1>Issues</h1>
 
-None at present.
+<p>1.  Should the type test for a pair, list, or vector incorporate the
+type tests for the elements?  For example, when creating a comparator
+for a pair of numbers, should the type test validate that the car and
+cdr are in fact numbers, or only that the object is a pair?</p>
 
 
 <h1>Rationale</h1>
@@ -43,17 +46,18 @@ None at present.
 The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, an ordering predicate is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
 </p>
 <p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
+procedures, as well as the syntax forms, have been removed as unnecessary.</p>
 
 <p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence that SRFI 114 was over-complicated but also inadequate inspired this redesign.</p>
 
 
 <h1>Specification</h1>
 
-p>The procedures in this SRFI are in the <code>(srfi 128)</code> library (or <code>(srfi :128)</code> on R6RS), but the sample implementation currently places them in the <code>(comparators)</code> library.  This means it can't be used alongside SRFI 114, but there's no reason for anyone to do that.</p>
+<p>The procedures in this SRFI are in the <code>(srfi 128)</code> library (or <code>(srfi :128)</code> on R6RS), but the sample implementation currently places them in the <code>(comparators)</code> library.  This means it can't be used alongside SRFI 114, but there's no reason for anyone to do that.</p>
 
 <h3 id="Definitions">Definitions</h3>
 <p>
-A <em>comparator</em> is an object of a disjoint type.  It is a bundle of procedures that are useful for comparing two objects either for equality or for ordering.  There are four procedures in the bundle:
+A <em>comparator</em> is an object of a disjoint type.  It is a bundle of procedures that are useful for comparing two objects either for equality or for ordering.  It is an error if any of the procedures have side effects.  There are four procedures in the bundle:
 </p>
 <ul><li><p>The <em>type test predicate</em> returns <code>#t</code> if its argument has the correct type to be passed as an argument to the other three procedures, and <code>#f</code> otherwise.</p>
 </li>
@@ -207,7 +211,7 @@ Returns a comparator known as a <var>default comparator</var> that accepts Schem
 <li><p>When applied to characters, it must compare them using <code>char=?</code> and <code>char&lt;?</code>.  In R5RS, this is an implementation-dependent order that is typically the same as Unicode codepoint order; in R6RS and R7RS, it is Unicode codepoint order.  It must also hash them using the hash function <code>char-hash</code>.</p></li>
 <li><p>When applied to strings, it must compare them using <code>string=?</code> and <code>string&lt;?</code>.  In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order order on Unicode codepoint order; in R7RS it is an implementation-defined order.  It must also hash them using the hash function <code>string-hash</code>.</p></li>
 <li><p>When applied to symbols, it must compare them using an implementation-dependent total order.  One possibility is to use the order obtained applying <code>symbol-&gt;string</code> to the symbols and comparing them using the total order implied by <code>string&lt;?</code>.  It must also hash them using the hash function <code>symbol-hash</code>.  It is not a requirement that symbol hash functions be consistent with string hash functions, however.</p></li>
-<li><p>When applied to numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.  It must also hash them using the hash function<code>number-hash</code>.</p></li>
+<li><p>When applied to numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.  It must also hash them using the hash function <code>number-hash</code>.</p></li>
 <li><p>When applied to real numbers, it must compare them using <code>=</code> and <code>&lt;</code>, and hash them using the hash function <code>number-hash</code>.</p></li>
 <li><p>When applied to vectors, it must behave the same as a comparator returned by <code>make-vector-comparator</code> with default arguments.</p></li>
 <li><p>When applied to bytevectors, it must behave the same as a comparator created by <code>(make-vector-comparator (make-comparator < = (lambda (x) x)) bytevector? bytevector-length bytevector-u8-ref)</code>.</li>
@@ -277,7 +281,7 @@ Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and retur
 </p>
 <p>
 These procedures are analogous to the number, character, and string comparison predicates of Scheme.  They allow the convenient use of comparators to handle arbitrary data types.</p>
-<p>These procedures apply the comparison procedure of <em>comparator</em> to the <em>objects</em> as follows.  If the specified relation returns <code>#t</code> for all <em>object<sub>i</sub></em> and <em>object<sub>j</sub></em> where <em>n</em> is the number of objects and 1 &lt;= <em>i &lt; j &lt;= n</em>, then the procedures return <code>#t</code>, but otherwise <code>#f</code>.</p>
+<p>These procedures apply the equality and ordering predicates of <em>comparator</em> to the <em>objects</em> as follows.  If the specified relation returns <code>#t</code> for all <em>object<sub>i</sub></em> and <em>object<sub>j</sub></em> where <em>n</em> is the number of objects and 1 &lt;= <em>i &lt; j &lt;= n</em>, then the procedures return <code>#t</code>, but otherwise <code>#f</code>.</p>
 
 <p>
 The order in which the values are compared is unspecified.  Because the relations are transitive, it suffices to compare each object with its successor.
