@@ -1,13 +1,6 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML//EN">
-<!-- saved from url=(0043)http://srfi.schemers.org/srfi-template.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>SRFI 128: Comparators (reduced)</title>
-    <link rel="stylesheet" href="http://srfi.schemers.org/srfi.css" type="text/css" />
-  <style>#content > #right > .dose > .dosesingle,
-#content > #center > .dose > .dosesingle
-{display:none !important;}</style></head>
-
-  <body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body>
+  <div>
 
 <h1>Title</h1>
 
@@ -19,7 +12,7 @@ John Cowan
 
 <h1>Status</h1>
 
-<p>This SRFI is currently in <em>draft</em> status. Here is <a href="http://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi minus 128 at srfi dotschemers dot org">srfi-128@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="http://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="http://srfi-email.schemers.org/srfi-128">archive</a>.</p>
+<p>This SRFI is currently in <em>draft</em> status. Here is <a href="http://srfi.schemers.org/srfi-process.html" target="_blank">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+128+at+srfi+dotschemers+dot+org" target="_blank">srfi-128@<span>nospam</span>srfi.schemers.<wbr>org</a></code>.  To subscribe to the list, follow <a href="http://srfi.schemers.org/srfi-list-subscribe.html" target="_blank">these instructions</a>.  You can access previous messages via the mailing list <a href="http://srfi-email.schemers.org/srfi-128" target="_blank">archive</a>.</p>
 <ul>
   <li>Received: 2015/10/26</li>
   <li>60-day deadline: 2015/12/25</li>
@@ -30,23 +23,23 @@ John Cowan
 <h1>Abstract</h1>
 
 <p>
-This SRFI provides <i>comparators</i>, procedure bundles that represent one or more of an equality predicate, an ordering predicate, and a hash function.  By packaging these procedures together, along with a type test predicate, they can be treated as a single item for use in the implementation of data structures.
+This SRFI provides <i>comparators</i>, which bundle a type test predicate,
+an equality procedure, an ordering predicate, and a hash function (the
+last two are optional) into a single Scheme object.  By packaging these
+procedures together, they can be treated as a single item for use in
+the implementation of data structures.
 </p>
 
 <h1>Issues</h1>
 
-<p>1.  Should the type test for a pair, list, or vector incorporate the
-type tests for the elements?  For example, when creating a comparator
-for a pair of numbers, should the type test validate that the car and
-cdr are in fact numbers, or only that the object is a pair?</p>
-
+None at present.
 
 <h1>Rationale</h1>
 
 <p>
-The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, an ordering predicate is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
+The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by its nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, an ordering predicate is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
 </p>
-<p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
+<p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114" target="_blank">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
 procedures, as well as the syntax forms, have been removed as unnecessary.</p>
 
 <p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence that SRFI 114 was over-complicated but also inadequate inspired this redesign.</p>
@@ -56,7 +49,7 @@ procedures, as well as the syntax forms, have been removed as unnecessary.</p>
 
 <p>The procedures in this SRFI are in the <code>(srfi 128)</code> library (or <code>(srfi :128)</code> on R6RS), but the sample implementation currently places them in the <code>(comparators)</code> library.  This means it can't be used alongside SRFI 114, but there's no reason for anyone to do that.</p>
 
-<h3 id="Definitions">Definitions</h3>
+<h3>Definitions</h3>
 <p>
 A <em>comparator</em> is an object of a disjoint type.  It is a bundle of procedures that are useful for comparing two objects either for equality or for ordering.  It is an error if any of the procedures have side effects.  There are four procedures in the bundle:
 </p>
@@ -81,14 +74,14 @@ It is also the programmer's responsibility to ensure that all four procedures pr
 <p>The comparator objects defined in this SRFI are not applicable to circular structure or to NaNs, or to objects containing any of these.  Attempts to pass any such objects to any procedure defined here, or to any procedure that is part of a comparator defined here, is an error except as otherwise noted.</p>
 <h3>Index</h3>
 <ul>
-<li><p><a href="#Predicates">Predicates</a>: <code>comparator?, comparator-ordered?, comparator-hashable?</code></p></li>
+<li><p><a href="https://mail-attachment.googleusercontent.com/attachment/u/0/?ui=2&ik=66456bd907&view=att&th=150ab4ee44e58fe3&attid=0.1&disp=inline&realattid=f_ig9wzol50&safe=1&zw&saddbat=ANGjdJ8AHDI4A2jaLAXHw4PxnzLVDzTy1wvXA5TTMa0T0GPUMINIfhbPT3_b8vipafJpvw8j6Yym-Od3rkM9_FMcsmZwHfGQ8tH85TftNIEG6RNFXAGVgLjaGS5SjaTlREQgsK0ppbFBDOsGholP6lFHGcBgCgL1X18tPmEBTIiwCBUCb1Ozl_6tPnieZkBXh9j3YvURnkSiCrJHQ4cL1aeIQPnyedv6dEg3lyw84sPJWOuLIhiGJ7GXbT5yBL7aQXN1z_n37D38P66YgvhSqNxc1nlPT8wegxjhMyV4DjRi1Bj4u9c79gFtwY-pV7mQgucJsqSLS_Nw6TXoYzqme9Dnr169ffmmzE9zZQD5bI84_XfiZOY68jQT4K-EOEr-6Yk8IXLW31uGP7hH-uOtDYhX0n36iIjQsVfj9qYwN1-HW2vJhdWvnxpiYdBkpFEoqIPjxe43qR9fJn6TFw-nhB4UR5fc-WeUEmRMs7rgB35Wude53_0-eproBv7VCMT4AgY88XfR8YUvu5MfZiLbdXWUdhIwk3NNE5bn2CCq3c14NYphR4iLHYCYEk-f25U7HSJCMDrpxYjQi88nEkpS6vsYKBwhP4pXqCDkHVL4gwL0G8OnToARtYjd_yeC5iA#0.1_Predicates">Predicates</a>: <code>comparator?, comparator-ordered?, comparator-hashable?</code></p></li>
 <li><p><a href="#Constructors">Constructors</a>: <code>make-comparator,  make-pair-comparator, make-list-comparator, make-vector-comparator, make-eq-comparator, make-eqv-comparator, make-equal-comparator</code></p></li>
-<li><p><a href="Hashfunctions">Standard hash functions</a>: <code>boolean-hash, char-hash, char-ci-hash, string-hash, string-ci-hash, symbol-hash, number-hash</code></p></li>
-<li><p><a href="#Defaultcomparators">Default comparators</a>: <code>default-comparator, comparator-register-default!</code></p></li>
-<li><p><a href="#Accessors">Accessors</a>: <code>comparator-type-test-procedure, comparator-equality-predicate, comparator-ordering-predicate, comparator-hash-function, comparator-check-type</code></p></li>
-<li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=?, &lt;?, >?, &lt;=?, >=?</code></p></li>
+<li><p><a href="#Hashfunctions">Standard hash functions</a>: <code>boolean-hash, char-hash, char-ci-hash, string-hash, string-ci-hash, symbol-hash, number-hash</code></p></li>
+<li><p><a href="#Defaultcomparators">Default comparators</a>: <code>default-comparator, default-hash, comparator-register-default!</code></p></li>
+<li><p><a href="#Accessors">Accessors</a>: <code>comparator-type-test-<wbr>procedure, comparator-equality-predicate, comparator-ordering-predicate, comparator-hash-function, comparator-check-type</code></p></li>
+<li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=?, &lt;?, &gt;?, &lt;=?, &gt;=?</code></p></li>
 </ul>
-<h3 id="Predicates">Predicates</h3>
+<h3>Predicates</h3>
 <p>
 <code>(comparator? </code><em>obj</em><code>)</code>
 </p>
@@ -107,7 +100,7 @@ Returns <code>#t</code> if <em>comparator</em> has a supplied hash function, and
 <h3 id="Constructors">Constructors</h3>
 <p>
 The following comparator constructors all supply appropriate type test functions, equality predicates, ordering predicates, and hash functions based on the supplied arguments.  They are allowed to cache their results: they need not return a newly allocated object, since comparators are pure and functional.
-</p></p>
+</p>
 <p>
 <code>(make-comparator </code><em>type-test equality ordering hash</em><code>)</code>
 </p>
@@ -115,40 +108,104 @@ The following comparator constructors all supply appropriate type test functions
 Returns a comparator which bundles the <em>type-test, equality, ordering</em>, and <em>hash</em> procedures provided.  As a convenience, if <em>ordering</em> or <em>hash</em> is <code>#f</code>, a procedure is provided that signals an error on application.  The predicates <code>comparator-ordered?</code> and/or <code>comparator-hashable?</code>, respectively, will return <code>#f</code> in these cases.
 </p>
 <p>Here are calls on <code>make-comparator</code> that will return useful comparators for standard Scheme types:
-<p>
-<ul>
-<li><p><code>(make-comparator boolean? boolean=? (lambda (x y) (and (not x) y)) (lambda (x) (if x 1 0)))</code> will return a comparator for booleans, expressing the ordering <code>#f</code> &lt; <code>#t</code> and a plausible hash function.</p></li>
-<li><p><code>(make-comparator real? = < (lambda (x) (exact (abs x))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
-<li><p><code>(make-comparator string? string=? string&lt;? string-hash)</code> will return a comparator expressing the implementation's ordering of strings.  On R5RS systems this is a lexicographic extension of some implementation-defined ordering of characters; on R6RS systems it is a lexicographic extension of Unicode codepoint order; on R7RS systems it is implementation-defined.</p></li>
+</p><p>
+</p><ul>
+<li><p><code>(make-comparator boolean? boolean=? (lambda (x y) (and (not x) y)) boolean-hash)</code> will return a comparator for booleans, expressing the ordering <code>#f</code> &lt; <code>#t</code> and a plausible hash function.</p></li>
+<li><p><code>(make-comparator real? = &lt; (lambda (x) (exact (abs x))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
+<li><p><code>(make-comparator string? string=? string&lt;? string-hash)</code> will return a comparator expressing the implementation's ordering of strings.  </p></li>
 <li><p><code>(make-comparator string? string-ci=? string-ci&lt;? string-ci-hash</code> will return a comparator expressing the implementation's case-insensitive ordering of strings.</p></li>
 </ul>
 <p>
 <code>(make-pair-comparator </code> [ <var>car-comparator cdr-comparator</var> ]<code>)</code>
+<p>This procedure returns comparators whose functions behave as follows.
+The default value of both <var>car-comparator</var> and <var>cdr-comparator</var>
+is a default comparator.
 </p>
-<p>This comparator compares pairs using <var>car-comparator</var> (a default comparator by default) on their cars. If the cars are not equal, that value is returned. If they are equal, <var>cdr-comparator</var> (also a default comparator by default) is used on their cdrs and that value is returned.  Hashing is done on both the car and cdr sides, and the results are hashed together.
-</p>
-<p><code>(make-list-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>empty? head tail</em> ] ]<code>)</code>
-</p>
-<p>
-Returns a comparator which lexicographically compares two sequences that satisfy <em>type-test</em> (<code>list</code> by default), as follows:</p>
 <ul>
-<li>The empty sequence, as determined by calling <var>empty?</var> (<code>null?</code> by default) compares equal to itself.</li>
-<li>The empty sequence compares less than any non-empty sequence.</li>
-<li>Two non-empty sequences are compared by comparing the result of calling the <var>head</var> procedure (<code>car</code> by default).  If the heads are not equal when compared using <var>element-comparator</var> (a default comparator by default), then the result is the result of that comparison.  Otherwise, the results of calling the <var>tail</var> procedure (<code>cdr</code> by default) are compared recursively.
-</li></ul>
-</p>
-<p>In particular, <code>(make-list-comparator)</code> returns a comparator that compares lists using a default comparator for the elements, and <code>(make-list-comparator </code><var>element-comparator</var><code>)</code> returns a comparator that compares lists using <var>element-comparator</var> for the elements.</p>
-<p><code>(make-vector-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>length ref</em> ] ]<code>)</code>
+<li><p>The type test returns <code>#t</code> if its argument is a pair,
+if the car satisfies the type test predicate of <var>car-comparator</var>, and the
+cdr satisfies the type test predicate of <var>cdr-comparator</var>.
+</p></li>
+<p><li>The equality function returns <code>#t</code> if the cars are equal
+according to <var>car-comparator</var> and the cdrs are equal according
+to <var>cdr-comparator</var>, and <code>#f</code> otherwise.</p></li>
+<li><p>The ordering function first compares the cars of its pairs using
+the equality predicate of <var>car-comparator</var>.  If they are not
+equal, then the ordering predicate of <var>car-comparator</var> is 
+applied to the cars and its value is returned.
+Otherwise, the predicate compares the cdrs using
+the equality predicate of <var>cdr-comparator</var>.  If they are not
+equal, then the ordering predicate of <var>cdr-comparator</var>
+is applied to the cdrs and its value is returned.</p></li>
+<p><li>The hash function computes the hash values of the
+car and the cdr using the hash functions of <var>car-comparator</var>
+and <var>cdr-comparator</var> respectively and then hashes them together.</p>
+</ul>
+<p><code>(make-list-comparator </code> [ <em>element-comparator</em> [ <em>type-test empty? head tail</em> ] ]<code>)</code>
 </p>
 <p>
-Returns a comparator which compares two sequences that satisfy <em>type-test</em> (<code>vector?</code> by default), using the <em>length</em> procedure (<code>vector-length</code> by default) to determine the lengths of the sequences, and the <em>ref</em> procedure (<code>vector-ref</code> by default) to access a particular elements.  If one sequence is shorter than the other, it compares less than the other.  If the sequences are the same length, they are compared element-wise using <var>element-comparator</var> (a default comparator by default) until they are exhausted.</p>
+The default value of <var>element-comparator</var> is a default comparator.
+The default values of <var>type-test</var>, <var>empty?</var>,
+<var>head</var>, and <var>tail</var> are <code>list?</code>,
+<code>null?</code>, <code>car</code>, and <var>cdr</var> respectively.
+This procedure returns comparators whose functions behave as follows:
+</p>
+<ul>
+<li><p>The type test returns <code>#t</code> if its argument satisfies
+<var>type-test</var> and the elements satisfy the type test predicate
+of <var>element-comparator</var>.</p></li>
+<li><p>The equality and ordering functions are defined by the following
+total lexicographic order: </p>
+<ul>
+<li>The empty sequence, as determined by calling <var>empty?</var>,
+compares equal to itself.</li>
+<li>The empty sequence compares less than any non-empty sequence.</li>
+<li>Two non-empty sequences are compared by calling the <var>head</var>
+procedure on each.  If the heads are not equal when compared using
+<var>element-comparator</var>, the result is the result of that comparison.
+Otherwise, the results of calling the <var>tail</var> procedure are
+compared recursively.</li>
+</ul>
+<li><p>The hash function computes the hash values of the
+elements using the hash function of <var>element-comparator</var>
+and then hashes them together.</p></li>
+</ul>
+<p>In particular, <code>(make-list-comparator)</code> returns a comparator that compares lists using a default comparator for the elements, and <code>(make-list-comparator </code><var>element-comparator</var><code>)</code> returns a comparator that compares lists using <var>element-comparator</var> for the elements.
+</p><p><code>(make-vector-comparator </code> [ <em>element-comparator</em> [ <em>type-test</em> <em>length ref</em> ] ]<code>)</code>
+</p>
+<p>
+The default value of <var>element-comparator</var> is a default comparator.
+The default values of <var>type-test</var>, <var>length</var>,
+and <var>ref</var> are <code>vector?</code>,
+<code>vector-length</code>, and <code>vector-ref</code> respectively.
+This procedure returns comparators whose functions behave as follows:
+</p>
+<ul>
+<li><p>The type test returns <code>#t</code> if its argument satisfies
+<var>type-test</var> and the elements satisfy the type test predicate
+of <var>element-comparator</var>.</p></li>
+<li><p>The equality predicate returns <code>#t</code> if both of the following
+tests are satisfied in order:  the lengths of the vectors are the
+same in the sense of <var>=</var>, and the elements of the vectors
+are the same in the sense of the equality predicate of
+<var>element-comparator</var>.</p></li>
+<li><p>The ordering predicate returns <code>#t</code> if
+the results of applying <var>length</var> to the first vector is less than
+the result of applying <var>length</var> to the second vector.
+If the lengths are equal, then the elements are examined pairwise using
+the ordering predicate of <var>element-comparator</var>.  If any element
+compares &lt; or &gt;, then that is the result of the ordering predicate.
+If all pairs of elements are equal, the result is <code>#f</code>.
+<p><li>The hash function computes the hash values of the
+elements using the hash function of <var>element-comparator</var>
+and then hashes them together.</p></li>
+</ul>
 <p>
 In particular, <code>(make-vector-comparator)</code> returns a comparator that compares vectors using a default comparator for the elements, and <code>(make-vector-comparator </code><var>element-comparator</var><code>)</code> returns a comparator that compares vectors using <var>element-comparator</var>.  Here is a more complex example returning a comparator that compares bytevectors as unsigned bytes:
 </p>
 <dl><dd>
-<pre>
-(make-vector-comparator
-  (make-comparator exact-integer? = < number-hash)
+<pre>(make-vector-comparator
+  (make-comparator exact-integer? = &lt; number-hash)
   bytevector?
   bytevector-length
   bytevector-u8-ref)
@@ -165,8 +222,18 @@ In particular, <code>(make-vector-comparator)</code> returns a comparator that c
 <code>(make-equal-comparator)</code>
 </p>
 <p>
-The equality predicates of these comparators are <code>eq?</code>, <code>eqv?</code>, and <code>equal?</code> respectively.  When their ordering procedures are applied to non-equal objects, their behavior is implementation-defined.  The type test predicates always return <code>#t</code>.
+<p>
+These procedures return comparators whose functions behave as follows:
 </p>
+<ul>
+<li><p>The type test returns <code>#t</code> in all cases.
+</p></li>
+<p><li>The equality functions are <code>eq?</code>, <code>eqv?</code>,
+and <code>equal?</code> respectively.</p></li>
+<li><p>The ordering function is implementation-defined if the equality
+predicate is false.</p></li>
+<li><p>The hash function is <code>default-hash</code>.</p></li>
+</ul>
 <p>These comparators accept circular structure (in the case of
 <code>equal-comparator</code>, provided the implementation's <code>equal?</code> predicate
 does so) and NaNs.</p>
@@ -196,8 +263,11 @@ does so) and NaNs.</p>
 <code>(number-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
 </p>
 <p>These are suitable hash functions for the specified types. The hash functions <code>char-ci-hash</code> and <code>string-ci-hash</code> treat their first argument case-insensitively.
+Note that while <code>symbol-hash</code> may return the hashed value of
+applying <code>symbol->string</code> and then <code>string-hash</code>
+to the symbol, it is not a requirement that <code>symbol-hash</code> be
+consistent with <code>string-hash</code>.
 </p>
-
 
 <h3 id="Defaultcomparators">Default comparators</h3>
 <p>
@@ -208,14 +278,14 @@ Returns a comparator known as a <var>default comparator</var> that accepts Schem
 </p>
 <ul><li><p>The following arbitrary ordering between types must hold: the empty list precedes pairs, which precede booleans, which precede characters, which precede strings, which precede symbols, which precede numbers, which precede vectors, which precede bytevectors, which precede all other objects.</p></li>
 <li><p>When applied to pairs, it must behave the same as a comparator returned by <code>make-pair-comparator</code> when applied to no arguments.</p></li>
-<li><p>When applied to booleans, it must compare them using the total order <code>#f</code> &lt; <code>#t</code> and hash them using the hash function <code>boolean-hash</code>.</p></li>
-<li><p>When applied to characters, it must compare them using <code>char=?</code> and <code>char&lt;?</code>.  In R5RS, this is an implementation-dependent order that is typically the same as Unicode codepoint order; in R6RS and R7RS, it is Unicode codepoint order.  It must also hash them using the hash function <code>char-hash</code>.</p></li>
-<li><p>When applied to strings, it must compare them using <code>string=?</code> and <code>string&lt;?</code>.  In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order order on Unicode codepoint order; in R7RS it is an implementation-defined order.  It must also hash them using the hash function <code>string-hash</code>.</p></li>
-<li><p>When applied to symbols, it must compare them using an implementation-dependent total order.  One possibility is to use the order obtained applying <code>symbol-&gt;string</code> to the symbols and comparing them using the total order implied by <code>string&lt;?</code>.  It must also hash them using the hash function <code>symbol-hash</code>.  It is not a requirement that symbol hash functions be consistent with string hash functions, however.</p></li>
-<li><p>When applied to numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.  It must also hash them using the hash function <code>number-hash</code>.</p></li>
-<li><p>When applied to real numbers, it must compare them using <code>=</code> and <code>&lt;</code>, and hash them using the hash function <code>number-hash</code>.</p></li>
+<li><p>When applied to booleans, it must compare them using the total order <code>#f</code> &lt; <code>#t</code>.</p></li>
+<li><p>When applied to characters, it must compare them using <code>char=?</code> and <code>char&lt;?</code>  In R5RS, this is an implementation-dependent order that is typically the same as Unicode codepoint order; in R6RS and R7RS, it is Unicode codepoint order..</p></li>
+<li><p>When applied to strings, it must compare them using <code>string=?</code> and <code>string&lt;?</code>.  In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order order on Unicode codepoint order; in R7RS it is an implementation-defined order.</p></li>
+<li><p>When applied to symbols, it must compare them using an implementation-dependent total order.  One possibility is to use the order obtained applying <code>symbol-&gt;string</code> to the symbols and comparing them using the total order implied by <code>string&lt;?</code>.</p></li>
+<li><p>When applied to numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.</p></li>
+<li><p>When applied to real numbers, it must compare them using <code>=</code> and <code>&lt;</code>.</p></li>
 <li><p>When applied to vectors, it must behave the same as a comparator returned by <code>make-vector-comparator</code> with default arguments.</p></li>
-<li><p>When applied to bytevectors, it must behave the same as a comparator created by <code>(make-vector-comparator (make-comparator < = (lambda (x) x)) bytevector? bytevector-length bytevector-u8-ref)</code>.</li>
+<li><p>When applied to bytevectors, it must behave the same as a comparator created by the expression <code>(make-vector-comparator (make-comparator &lt; = number-hash) bytevector? bytevector-length bytevector-u8-ref)</code>.</p></li>
 <li><p>When applied to types registered with <code>comparator-register-default!</code>: it must behave the same as the comparator registered using that function.</p></li>
 <li><p>Given disjoint types <em>a</em> and <em>b</em>, one of three conditions must hold:</p>
 <ul>
@@ -223,8 +293,26 @@ Returns a comparator known as a <var>default comparator</var> that accepts Schem
 <li>All objects of type <em>a</em> compare greater than all objects of type <em>b</em>.</li>
 <li>All objects of either type <em>a</em> or type <em>b</em> compare equal to each other.  This is not permitted for any of the standard types listed above.</li>
 </ul>
-</p></li>
+</li></ul>
+<p>Default comparators use <code>default-hash</code> as their hash function.</p>
+
+<p>
+<code>(default-hash</code> obj [ <var>bound</var> [ <var>salt</var> ] ] <code>)</code>
+</p>
+<p>This is the hash function used by default comparators.
+It accepts a Scheme value and hashes it in some implementation-defined way,
+subject to the following conditions:</p>
+<ul>
+<li>When applied to a pair, it must return the result of hashing together the
+values returned by a default comparator applied to the car and the cdr.</li>
+<li>When applied to a boolean, character, string, symbol, or number,
+it must return the same result as <code>boolean-hash</code>,
+<code>char-hash</code>, <code>string-hash</code>,
+<code>symbol-hash</code>, or <code>number-hash</code> respectively.</li>
+<li>When applied to a list or vector, it must return the result of hashing
+together the values returned by a default comparator applied to the elements.</li>
 </ul>
+
 <p><code>(comparator-register-default! </code><var>comparator</var><code>)</code>
 </p>
 <p>
@@ -232,10 +320,10 @@ Registers <var>comparator</var> for use by default comparators, such that if the
 both satisfy the type test predicate of <var>comparator</var>, it will be employed by default comparators
 to compare them.
 </p>
-</p>
+<p></p>
 <h3 id="Accessors">Accessors</h3>
 <p>
-<code>(comparator-type-test-procedure </code><em>comparator</em><code>)</code>
+<code>(comparator-type-test-<wbr>procedure </code><em>comparator</em><code>)</code>
 </p>
 <p>
 Returns the type test predicate of <em>comparator</em>.
@@ -281,27 +369,25 @@ Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and retur
 <code>(&gt;=? </code><em>comparator</em> <em>object<sub>1</sub> object<sub>2</sub> object<sub>3</sub></em> ...<code>)</code>
 </p>
 <p>
-These procedures are analogous to the number, character, and string comparison predicates of Scheme.  They allow the convenient use of comparators to handle arbitrary data types.</p>
-<p>These procedures apply the equality and ordering predicates of <em>comparator</em> to the <em>objects</em> as follows.  If the specified relation returns <code>#t</code> for all <em>object<sub>i</sub></em> and <em>object<sub>j</sub></em> where <em>n</em> is the number of objects and 1 &lt;= <em>i &lt; j &lt;= n</em>, then the procedures return <code>#t</code>, but otherwise <code>#f</code>.</p>
-
-<p>
-The order in which the values are compared is unspecified.  Because the relations are transitive, it suffices to compare each object with its successor.
+These procedures are analogous to the number, character, and string comparison predicates of Scheme.  They allow the convenient use of comparators to handle variable data types.</p>
+<p>These procedures apply the equality and ordering predicates of <em>comparator</em> to the <em>objects</em> as follows.  If the specified relation returns <code>#t</code> for all <em>object<sub>i</sub></em> and <em>object<sub>j</sub></em> where <em>n</em> is the number of objects and 1 &lt;= <em>i &lt; j &lt;= n</em>, then the procedures return <code>#t</code>, but otherwise <code>#f</code>.
+Because the relations are transitive, it suffices to compare each object with its successor.
+The order in which the values are compared is unspecified.
 </p>
 
 <h1>Implementation</h1>
 
 
-<p>The <a href="comparators.tar.gz">sample implementation</a> 
-is found in the repository of this SRFI.  It contains the following files.</p>
+<p>The <a href="http://comparators.tar.gz/" target="_blank">sample implementation</a> 
+is (not yet) found in the repository of this SRFI.  It contains the following files.</p>
 <ul><li><code>comparators-impl.scm</code> - the record type definition and most of the procedures</li>
 <li><code>default.scm</code> - a simple implementation of the default constructor, which should be improved by implementers to handle records and implementation-specific types</li>
 <li><code>hash.scm</code> - built-in hash functions</li>
-<li><code>r7rs-shim.scm</code> - procedures for R7RS compatibility, including a trivial implementation of bytevectors on top of <a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI 4</a> u8vectors</li>
+<li><code>r7rs-shim.scm</code> - procedures for R7RS compatibility, including a trivial implementation of bytevectors on top of <a href="http://srfi.schemers.org/srfi-4/srfi-4.html" target="_blank">SRFI 4</a> u8vectors</li>
 <li><code>complex-shim.scm</code> - a trivial implementation of <code>real-part</code> and <code>imag-part</code> for Schemes that don't have complex numbers</li>
 <li><code>comparators.sld</code> - an R7RS library</li>
 <li><code>comparators.scm</code> - a Chicken library</li>
 <li><code>comparators-test.scm</code> - a test file using the Chicken <code>test</code> egg</li></ul>
-<a href="http://srfi.schemers.org/srfi%20minus%20???-reference.scm">Source for the reference implementation.</a>
 
 <h1>Copyright</h1>
 Copyright (C) John Cowan (2015). All Rights Reserved. 
@@ -325,4 +411,4 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
     </p><hr>
-    <address>Editor: <a href="mailto:srfi-editors at srfi dot schemers dot org">Arthur A. Gleckler</a></address></body></html>
+    <address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org" target="_blank">Arthur A. Gleckler</a></address></div>
