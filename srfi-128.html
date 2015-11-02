@@ -45,7 +45,7 @@ None at present.
 The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by its nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, an ordering predicate is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
 </p>
 <p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114" target="_blank">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
-procedures, as well as the syntax forms, have been removed as unnecessary.</p>
+procedures, as well as the all but one of the syntax forms, have been removed as unnecessary.</p>
 
 <p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence that SRFI 114 was over-complicated but also inadequate inspired this redesign.</p>
 
@@ -79,12 +79,13 @@ It is also the programmer's responsibility to ensure that all four procedures pr
 <p>The comparator objects defined in this SRFI are not applicable to circular structure or to NaNs, or to objects containing any of these.  Attempts to pass any such objects to any procedure defined here, or to any procedure that is part of a comparator defined here, is an error except as otherwise noted.</p>
 <h3>Index</h3>
 <ul>
-<li><p><a href="https://mail-attachment.googleusercontent.com/attachment/u/0/?ui=2&ik=66456bd907&view=att&th=150ab4ee44e58fe3&attid=0.1&disp=inline&realattid=f_ig9wzol50&safe=1&zw&saddbat=ANGjdJ8AHDI4A2jaLAXHw4PxnzLVDzTy1wvXA5TTMa0T0GPUMINIfhbPT3_b8vipafJpvw8j6Yym-Od3rkM9_FMcsmZwHfGQ8tH85TftNIEG6RNFXAGVgLjaGS5SjaTlREQgsK0ppbFBDOsGholP6lFHGcBgCgL1X18tPmEBTIiwCBUCb1Ozl_6tPnieZkBXh9j3YvURnkSiCrJHQ4cL1aeIQPnyedv6dEg3lyw84sPJWOuLIhiGJ7GXbT5yBL7aQXN1z_n37D38P66YgvhSqNxc1nlPT8wegxjhMyV4DjRi1Bj4u9c79gFtwY-pV7mQgucJsqSLS_Nw6TXoYzqme9Dnr169ffmmzE9zZQD5bI84_XfiZOY68jQT4K-EOEr-6Yk8IXLW31uGP7hH-uOtDYhX0n36iIjQsVfj9qYwN1-HW2vJhdWvnxpiYdBkpFEoqIPjxe43qR9fJn6TFw-nhB4UR5fc-WeUEmRMs7rgB35Wude53_0-eproBv7VCMT4AgY88XfR8YUvu5MfZiLbdXWUdhIwk3NNE5bn2CCq3c14NYphR4iLHYCYEk-f25U7HSJCMDrpxYjQi88nEkpS6vsYKBwhP4pXqCDkHVL4gwL0G8OnToARtYjd_yeC5iA#0.1_Predicates">Predicates</a>: <code>comparator?, comparator-ordered?, comparator-hashable?</code></p></li>
+<li><p><a href="#Predicates">Predicates</a>: <code>comparator?, comparator-ordered?, comparator-hashable?</code></p></li>
 <li><p><a href="#Constructors">Constructors</a>: <code>make-comparator,  make-pair-comparator, make-list-comparator, make-vector-comparator, make-eq-comparator, make-eqv-comparator, make-equal-comparator</code></p></li>
 <li><p><a href="#Hashfunctions">Standard hash functions</a>: <code>boolean-hash, char-hash, char-ci-hash, string-hash, string-ci-hash, symbol-hash, number-hash</code></p></li>
 <li><p><a href="#Defaultcomparators">Default comparators</a>: <code>default-comparator, default-hash, comparator-register-default!</code></p></li>
 <li><p><a href="#Accessors">Accessors</a>: <code>comparator-type-test-<wbr>procedure, comparator-equality-predicate, comparator-ordering-predicate, comparator-hash-function, comparator-check-type</code></p></li>
 <li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=?, &lt;?, &gt;?, &lt;=?, &gt;=?</code></p></li>
+<li><p><a href="#Syntax">Syntax</a>: <code>if&lt;=&gt;</code></p></li>
 </ul>
 <h3>Predicates</h3>
 <p>
@@ -104,7 +105,8 @@ Returns <code>#t</code> if <em>comparator</em> has a supplied hash function, and
 </p>
 <h3 id="Constructors">Constructors</h3>
 <p>
-The following comparator constructors all supply appropriate type test functions, equality predicates, ordering predicates, and hash functions based on the supplied arguments.  They are allowed to cache their results: they need not return a newly allocated object, since comparators are pure and functional.
+The following comparator constructors all supply appropriate type test functions, equality predicates, ordering predicates, and hash functions based on the supplied arguments.  They are allowed to cache their results: they need not return a newly allocated object, since comparators are pure and functional.  In addition, the procedures
+in a comparator are likewise pure and functional.
 </p>
 <p>
 <code>(make-comparator </code><em>type-test equality ordering hash</em><code>)</code>
@@ -152,15 +154,15 @@ and <var>cdr-comparator</var> respectively and then hashes them together.</p>
 The default value of <var>element-comparator</var> is a default comparator.
 The default values of <var>type-test</var>, <var>empty?</var>,
 <var>head</var>, and <var>tail</var> are <code>list?</code>,
-<code>null?</code>, <code>car</code>, and <var>cdr</var> respectively.
+<code>null?</code>, <code>car</code>, and <code>cdr</code> respectively.
 This procedure returns comparators whose functions behave as follows:
 </p>
 <ul>
 <li><p>The type test returns <code>#t</code> if its argument satisfies
 <var>type-test</var> and the elements satisfy the type test predicate
 of <var>element-comparator</var>.</p></li>
-<li><p>The equality and ordering functions are defined by the following
-total lexicographic order: </p>
+<li><p>The total order defined by the equality and ordering functions 
+is as follows (known as lexicographic order): </p>
 <ul>
 <li>The empty sequence, as determined by calling <var>empty?</var>,
 compares equal to itself.</li>
@@ -198,9 +200,10 @@ are the same in the sense of the equality predicate of
 the results of applying <var>length</var> to the first vector is less than
 the result of applying <var>length</var> to the second vector.
 If the lengths are equal, then the elements are examined pairwise using
-the ordering predicate of <var>element-comparator</var>.  If any element
-compares &lt; or &gt;, then that is the result of the ordering predicate.
-If all pairs of elements are equal, the result is <code>#f</code>.
+the ordering predicate of <var>element-comparator</var>.  If any pair of elements
+returns <code>#t</code>, then that is the result of the list comparator's
+ordering predicate;
+otherwise the result is <code>#f</code>
 <p><li>The hash function computes the hash values of the
 elements using the hash function of <var>element-comparator</var>
 and then hashes them together.</p></li>
@@ -237,7 +240,8 @@ These procedures return comparators whose functions behave as follows:
 and <code>equal?</code> respectively.</p></li>
 <li><p>The ordering function is implementation-defined if the equality
 predicate is false.</p></li>
-<li><p>The hash function is <code>default-hash</code>.</p></li>
+<li><p>The hash function is <code>default-hash</code>;
+the type test predicate always returns <code>#t</code>.</p></li>
 </ul>
 <p>These comparators accept circular structure (in the case of
 <code>equal-comparator</code>, provided the implementation's <code>equal?</code> predicate
@@ -379,6 +383,20 @@ These procedures are analogous to the number, character, and string comparison p
 Because the relations are transitive, it suffices to compare each object with its successor.
 The order in which the values are compared is unspecified.
 </p>
+<h3 id="Syntax">Syntax</h3>
+<p>
+<code>(if&lt;=&gt; </code> [ &lt;comparator&gt; ] &lt;object<sub>1</sub>&gt; &lt;object<sub>2</sub>&gt; &lt;less-than&gt; &lt;equal-to&gt; &lt;greater-than&gt;<code>)</code>
+
+<p>
+It is an error unless &lt;comparator&gt; evaluates to a comparator
+and &lt;object<sub>1</sub> and &lt;object<sub>2</sub>&gt; evaluate to
+objects that the comparator can handle.  If the ordering predicate returns
+<code>#t</code>, &lt;less-than&gt; is evaluated and its value returned.
+If the equality predicate returns <code>#t</code>, &lt;equal-to&gt;
+is evaluated and its value returned.  If neither is true,
+&lt;greater-than&gt; is evaluated and its value returned.
+</p>
+<p>If &lt;comparator&gt; is omitted, a default comparator is used.</p>
 
 <h1>Implementation</h1>
 
