@@ -49,7 +49,7 @@ None at present.
 The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by its nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, procedures specifying a total order is required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
 </p>
 <p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114" target="_blank">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized 
-procedures, as well as the all but one of the syntax forms, have been removed as unnecessary.</p>
+procedures, as well as all but one of the syntax forms, have been removed as unnecessary.</p>
 
 <p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence that SRFI 114 was unacceptable inspired this redesign.</p>
 
@@ -82,7 +82,7 @@ It is also the programmer's responsibility to ensure that all four procedures pr
 <li><p><a href="#Constructors">Constructors</a>: <code>make-comparator  make-pair-comparator make-list-comparator make-vector-comparator make-eq-comparator make-eqv-comparator make-equal-comparator</code></p></li>
 <li><p><a href="#Hashfunctions">Standard hash functions</a>: <code>boolean-hash char-hash char-ci-hash string-hash string-ci-hash symbol-hash number-hash</code></p></li>
 <li><p><a href="#Defaultcomparators">Default comparators</a>: <code>make-default-comparator default-hash comparator-register-default!</code></p></li>
-<li><p><a href="#Invokers">Invokers</a>: <code>comparator-test-type comparator-check-type comparator-hash</code></p></li>
+<li><p><a href="#Accessorsandinvokers">Accessors and invokers</a>: <code>comparator-type-test-predicate comparator-equality-predicate comparator-ordering-predicate comparator-hash-function comparator-test-type comparator-check-type comparator-hash</code></p></li>
 <li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=? &lt;? &gt;? &lt;=? &gt;=?</code></p></li>
 <li><p><a href="#Syntax">Syntax</a>: <code>comparator-if&lt;=&gt;</code></p></li>
 </ul>
@@ -111,7 +111,7 @@ in a comparator are likewise pure and functional.
 <code>(make-comparator </code><em>type-test equality ordering hash</em><code>)</code>
 </p>
 <p>
-Returns a comparator which bundles the <em>type-test, equality, ordering</em>, and <em>hash</em> procedures provided.  As a convenience, if <em>ordering</em> or <em>hash</em> is <code>#f</code>, a procedure is provided that signals an error on application.  The predicates <code>comparator-ordered?</code> and/or <code>comparator-hashable?</code>, respectively, will return <code>#f</code> in these cases.
+Returns a comparator which bundles the <em>type-test, equality, ordering</em>, and <em>hash</em> procedures provided.  However, if <em>ordering</em> or <em>hash</em> is <code>#f</code>, a procedure is provided that signals an error on application.  The predicates <code>comparator-ordered?</code> and/or <code>comparator-hashable?</code>, respectively, will return <code>#f</code> in these cases.
 </p>
 <p>Here are calls on <code>make-comparator</code> that will return useful comparators for standard Scheme types:
 </p><p>
@@ -229,7 +229,7 @@ These procedures return comparators whose functions behave as follows:
 and <code>equal?</code> respectively.</p></li>
 <li><p>The ordering function is implementation-defined if the equality
 predicate is false.</p></li>
-<li><p>The hash function is <code>default-hash</code>;
+<li><p>The hash function is <code>default-hash</code>.</p></li>
 the type test predicate always returns <code>#t</code>.</p></li>
 </ul>
 <p>These comparators accept circular structure (in the case of
@@ -239,8 +239,8 @@ does so) and NaNs.</p>
 <h3 id="Hashfunctions">Standard hash functions</h3>
 <p>These are hash functions for some standard Scheme types, suitable for
 passing to <code>make-comparator</code>.  Users may write their own
-hash functions with the same signature.  However, if hash
-function wish to be backward compatible with the reference implementation
+hash functions with the same signature.  However, if programmers wish their hash
+functions to be backward compatible with the reference implementation
 of <a href="http://srfi.schemers.org/srfi-69/srfi-69.html">SRFI 69</a>,
 they are advised to write their hash functions to accept a second argument
 and ignore it.
@@ -309,13 +309,14 @@ accepts a Scheme value and hashes it in some implementation-defined way,
 subject to the following conditions:</p>
 <ul>
 <li>When applied to a pair, it must return the result of hashing together the
-values returned by a default comparator applied to the car and the cdr.</li>
+values returned by <code>default-hash</code> when applied to the car and the cdr.</li>
 <li>When applied to a boolean, character, string, symbol, or number,
 it must return the same result as <code>boolean-hash</code>,
 <code>char-hash</code>, <code>string-hash</code>,
 <code>symbol-hash</code>, or <code>number-hash</code> respectively.</li>
 <li>When applied to a list or vector, it must return the result of hashing
-together the values returned by a default comparator applied to the elements.</li>
+together the values returned by <code>default-hash</code> when applied
+to each of the elements.</li>
 </ul>
 
 <p><code>(comparator-register-default! </code><var>comparator</var><code>)</code>
@@ -324,37 +325,49 @@ together the values returned by a default comparator applied to the elements.</l
 Registers <var>comparator</var> for use by default comparators, such that if the objects being compared
 both satisfy the type test predicate of <var>comparator</var>, it will be employed by default comparators
 to compare them.  Returns an unspecified value.
-It is an error if the an argument satisfies both the type test predicate
+It is an error if any value satisfies both the type test predicate
 of <var>comparator</var> and either a standard Scheme type test predicate
 or the type test predicate of a comparator that has already been registered.
 </p>
 <p></p>
-<h3 id="Invokers">Invokers</h3>
-<p>Note: Because the contents of a comparator are procedures, 
-it's more convenient to provide an <i>invoker</i> that applies one of the
-procedures to arguments rather than an accessor whose result will be
-immediately invoked.
-No invokers are required for the equality and ordering predicates,
-because <code>=?</code> and <code>&lt;?</code> serve this function.
+<h3 id="Accessorsandinvokers">Accessors and Invokers</h3>
+<p>
+<code>(comparator-type-test-predicate </code><em>comparator</em><code>)</code>
 </p>
+<p>
+<code>(comparator-equality-predicate </code><em>comparator</em><code>)</code>
+</p>
+<p>
+<code>(comparator-ordering-predicate </code><em>comparator</em><code>)</code>
+</p>
+<p>
+<code>(comparator-hash-function </code><em>comparator</em><code>)</code>
+</p>
+<p>Return the four procedures of <i>comparator</i>.</p>
+
 <p>
 <code>(comparator-test-type </code><em>comparator obj</em><code>)</code>
 </p>
 <p>
 Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and returns what it returns.
+More convenient than <code>comparator-type-test-predicate</code>, but less efficient when the predicate is called repeatedly.</p>
 </p>
 <p>
 <code>(comparator-check-type </code><em>comparator obj</em><code>)</code>
 </p>
 <p>
 Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and returns true if it returns true and signals an error otherwise.
+More convenient than <code>comparator-type-test-predicate</code>, but less efficient when the predicate is called repeatedly.</p>
 </p>
-<p>
 <p>
 <code>(comparator-hash </code><em>comparator obj</em><code>)</code>
 </p>
 <p>
 Invokes the hash function of <em>comparator</em> on <var>obj</var> and returns what it returns.
+More convenient than <code>comparator-hash-function</code>, but less efficient when the function is called repeatedly.</p>
+</p>
+<p>Note: No invokers are required for the equality and ordering predicates,
+because <code>=?</code> and <code>&lt;?</code> serve this function.
 </p>
 <h3 id="Comparisonpredicates">Comparison predicates</h3>
 <p>
