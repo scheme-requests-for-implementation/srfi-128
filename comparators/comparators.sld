@@ -8,7 +8,10 @@
   (export boolean-hash char-hash char-ci-hash
           string-hash string-ci-hash symbol-hash number-hash)
   (export make-default-comparator default-hash comparator-register-default!)
+  (export comparator-type-test-predicate comparator-equality-predicate
+        comparator-ordering-predicate comparator-hash-function)
   (export comparator-test-type comparator-check-type comparator-hash)
+  (export hash-bound hash-salt with-hash-salt)
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (include "comparators-impl.scm")

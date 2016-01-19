@@ -1,0 +1,13 @@
+;; -*- mode: Scheme; -*-
+((category data)
+ (license "BSD")
+ (author "John Cowan, Egg by Jörg F. Wittenberger")
+ (synopsis "SRFI-128: Comparators (reduced)")
+ ;(doc-from-wiki)
+ (files "comparators.meta" "comparators.setup"
+	"comparators.scm" "r7rs-shim.scm" "comparators-impl.scm" "default.scm"
+	"comparators-test.scm"
+	"comparators.sld" "complex-shim.scm"
+	)
+ (needs srfi-4 srfi-13)
+ '((version 0.1)))

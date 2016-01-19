@@ -5,7 +5,7 @@
 ;;; other way is to make it so complicated that there are no *obvious*
 ;;; deficiencies." --Tony Hoare
 
-;;; Comparison syntax (because syntax must be defined before it is used)
+;;; Syntax (because syntax must be defined before it is used, contra Dr. Hardcase)
 
 ;; Arithmetic if
 (define-syntax comparator-if<=>
@@ -17,6 +17,22 @@
        ((=? comparator a b) equal)
        ((<? comparator a b) less)
        (else greater)))))
+
+;; Upper bound of hash functions is 2^25-1
+(define-syntax hash-bound
+  (syntax-rules ()
+    ((hash-bound) 33554432)))
+
+(define %salt% (make-parameter 16064047))
+
+(define-syntax hash-salt
+   (syntax-rules ()
+     ((hash-salt) (%salt%))))
+
+(define-syntax with-hash-salt
+  (syntax-rules ()
+    ((with-hash-salt new-salt hash-func obj)
+     (parameterize ((%salt% new-salt)) (hash-func obj)))))
 
 ;;; Definition of comparator records with accessors and basic comparator
 
@@ -78,29 +94,29 @@
 ;; General versions for export
 
 (define (=? comparator a b . objs)
-  (if (binary=? comparator a b)
-    (if (null? objs) #t (apply =? comparator b objs))
-    #f))
+  (let loop ((a a) (b b) (objs objs))
+    (and (binary=? comparator a b)
+	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (<? comparator a b . objs)
-  (if (binary<? comparator a b)
-    (if (null? objs) #t (apply <? comparator b objs))
-    #f))
+  (let loop ((a a) (b b) (objs objs))
+    (and (binary<? comparator a b)
+	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (>? comparator a b . objs)
-  (if (binary>? comparator a b)
-    (if (null? objs) #t (apply >? comparator b objs))
-    #f))
+  (let loop ((a a) (b b) (objs objs))
+    (and (binary>? comparator a b)
+	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (<=? comparator a b . objs)
-  (if (binary<=? comparator a b)
-    (if (null? objs) #t (apply <=? comparator b objs))
-    #f))
+  (let loop ((a a) (b b) (objs objs))
+    (and (binary<=? comparator a b)
+	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (>=? comparator a b . objs)
-  (if (binary>=? comparator a b)
-    (if (null? objs) #t (apply >=? comparator b objs))
-    #f))
+  (let loop ((a a) (b b) (objs objs))
+    (and (binary>=? comparator a b)
+	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 
 ;;; Simple ordering and hash functions
@@ -109,23 +125,21 @@
   ;; #f < #t but not otherwise
   (and (not a) b))
 
-;; Define dummy value of salt
-(define salt 2)
 
 (define (boolean-hash obj)
-  (* salt (if obj 1 2)))
+  (if obj (%salt%) 0))
 
 (define (char-hash obj)
-  (* salt (char->integer obj)))
+  (modulo (* (%salt%) (char->integer obj)) (hash-bound)))
 
 (define (char-ci-hash obj)
-    (* salt (char->integer (char-foldcase obj))))
+  (modulo (* (%salt%) (char->integer (char-foldcase obj))) (hash-bound)))
 
 (define (number-hash obj)
   (cond
-    ((nan? obj) salt)
-    ((and (infinite? obj) (positive? obj)) (* salt salt))
-    ((infinite? obj) (* salt salt salt))
+    ((nan? obj) (%salt%))
+    ((and (infinite? obj) (positive? obj)) (* 2 (%salt%)))
+    ((infinite? obj) (* (%salt%) 3))
     ((real? obj) (abs (exact obj)))
     (else (+ (number-hash (real-part obj)) (number-hash (imag-part obj))))))
 
@@ -157,15 +171,14 @@
 
 ;;; Sequence ordering and hash functions
 ;; The hash functions are based on djb2, but
-;; modulo 2^20 instead of 2^32 in hopes of sticking to fixnums.
-(define limit 1048576)
+;; modulo 2^25 instead of 2^32 in hopes of sticking to fixnums.
 
-;; Return hash-accumulating object
-(define (make-hasher salt)
-  (let ((result (* (abs (+ salt 1)) 5381)))
+(define (make-hasher)
+  (let ((result (%salt%)))
     (case-lambda
-      (() result)
-      ((n) (set! result (+ (modulo (* result 33) limit) n))))))
+     (() result)
+     ((n) (set! result (+ (modulo (* result 33) (hash-bound)) n))
+          result))))
 
 ;;; Pair comparator
 (define (make-pair-comparator car-comparator cdr-comparator)
@@ -194,7 +207,7 @@
 
 (define (make-pair-hash car-comparator cdr-comparator)
    (lambda (obj)
-     (let ((acc (make-hasher salt)))
+     (let ((acc (make-hasher)))
        (acc (comparator-hash car-comparator (car obj)))
        (acc (comparator-hash cdr-comparator (cdr obj)))
        (acc))))
@@ -244,13 +257,13 @@
           ((empty? a) #t)
           ((empty? b) #f)
           ((elem=? (head a) (head b)) (loop (tail a) (tail b)))
-          ((elem<? (head a) (head b) #t))
+          ((elem<? (head a) (head b)) #t)
           (else #f))))))
 
 (define (make-list-hash element-comparator type-test empty? head tail)
   (lambda (obj)
     (let ((elem-hash (comparator-hash-function element-comparator))
-          (acc (make-hasher salt)))
+          (acc (make-hasher)))
       (let loop ((obj obj))
         (cond
           ((empty? obj) (acc))
@@ -309,7 +322,7 @@
 (define (make-vector-hash element-comparator type-test length ref)
   (lambda (obj)
     (let ((elem-hash (comparator-hash-function element-comparator))
-          (acc (make-hasher salt))
+          (acc (make-hasher))
           (len (length obj)))
       (let loop ((n 0))
         (cond
@@ -317,7 +330,7 @@
           (else (acc (ref obj n)) (loop (+ n 1))))))))
 
 (define (string-hash obj)
-  (let ((acc (make-hasher salt))
+  (let ((acc (make-hasher))
         (len (string-length obj)))
     (let loop ((n 0))
       (cond

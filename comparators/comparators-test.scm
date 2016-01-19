@@ -202,6 +202,18 @@
 
   ) ; end comparators/default
 
+  (test-group "comparators/accessors"
+    (define ttp (lambda (x) #t))
+    (define eqp (lambda (x y) #t))
+    (define orp (lambda (x y) #t))
+    (define hf (lambda (x) 0))
+    (define comp (make-comparator ttp eqp orp hf))
+    (test ttp (comparator-type-test-predicate comp))
+    (test eqp (comparator-equality-predicate comp))
+    (test orp (comparator-ordering-predicate comp))
+    (test hf (comparator-hash-function comp))
+  ) ; end comparators/accessors
+
   (test-group "comparators/invokers"
     (test-assert (comparator-test-type real-comparator 3))
     (test-assert (comparator-test-type real-comparator 3.0))
@@ -233,6 +245,15 @@
     (test 'greater (comparator-if<=> "2" "1" 'less 'equal 'greater))
 
   ) ; end comparators/syntax
+
+  (test-group "comparators/bound-salt"
+    (test-assert (exact-integer? (hash-bound)))
+    (test-assert (exact-integer? (hash-salt)))
+    (test-assert (< (hash-salt) (hash-bound)))
+    (define (fake-salt-hash obj) (hash-salt))
+    (test (hash-salt) (fake-salt-hash #t))
+    (test 47 (with-hash-salt 47 fake-salt-hash #t))
+  ) ; end comparators/bound-salt
 
 ) ; end comparators
 

@@ -78,8 +78,8 @@
     ((5) (symbol<? a b))
     ((6) (complex<? a b))
     ((7) ((make-vector<? (make-default-comparator) vector? vector-length vector-ref) a b))
-    ((8) ((make-vector<? (make-comparator exact-integer? = < default-hash))
-                          bytevector? bytevector-length bytevector-u8-ref) a b)
+    ((8) ((make-vector<? (make-comparator exact-integer? = < default-hash)
+			 bytevector? bytevector-length bytevector-u8-ref) a b))
     ; Add more here
     (else (binary<? (registered-comparator type) a b))))
 
