@@ -29,7 +29,6 @@ John Cowan
   <li>Draft #7 published: 2015/11/23</li>
   <li>Draft #8 published: 2015/12/17</li>
   <li>Draft #9 published: 2015/12/25</li>
-  <li>Draft #9 published: 2015/12/25</li>
   <li>Draft #10 published: 2016/1/18</li>
 </ul>
 
@@ -93,7 +92,7 @@ It is also the programmer's responsibility to ensure that all four procedures pr
 <li><p><a href="#Predicates">Predicates</a>: <code>comparator? comparator-ordered? comparator-hashable?</code></p></li>
 <li><p><a href="#Constructors">Constructors</a>: <code>make-comparator  make-pair-comparator make-list-comparator make-vector-comparator make-eq-comparator make-eqv-comparator make-equal-comparator</code></p></li>
 <li><p><a href="#Hashfunctions">Standard hash functions</a>: <code>boolean-hash char-hash char-ci-hash string-hash string-ci-hash symbol-hash number-hash</code></p></li>
-<li><p><a href="#Boundsandsalt">Bounds and salt</a>: <code>hash-bound hash-salt with-hash-salt</code></p></li>
+<li><p><a href="#Boundsandsalt">Bounds and salt</a>: <code>hash-bound hash-salt</code></p></li>
 <li><p><a href="#Defaultcomparators">Default comparators</a>: <code>make-default-comparator default-hash comparator-register-default!</code></p></li>
 <li><p><a href="#Accessorsandinvokers">Accessors and invokers</a>: <code>comparator-type-test-predicate comparator-equality-predicate comparator-ordering-predicate comparator-hash-function comparator-test-type comparator-check-type comparator-hash</code></p></li>
 <li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=? &lt;? &gt;? &lt;=? &gt;=?</code></p></li>
@@ -319,15 +318,9 @@ they are not required to make use of the current salt.</p>
 <p>The initial value is implementation-dependent, but must be less
 than the value of <code>(hash-bound)</code>, and should be distinct
 for distinct runs of a program unless otherwise specified by the
-implementation.</p>
+implementation.  Implementations may provide a means to specify the salt
+value to be used by a particular invocation of a hash function.</p>
 
-<p><code>(with-hash-salt </code><var>salt hash-function obj</var><code>)</code> [syntax]</p>
-<p>Invokes the procedure <var>hash-function</var> on the
-object <var>obj</var> in such a way that any reference to
-<code>(hash-salt)</code> dynamically within the invocation
-will return <var>salt</var> rather than its default value.  It is an
-error unless the value of <var>salt</var> is less than the value of
-<var>bound</var>.</p>
 
 <h3 id="Defaultcomparators">Default comparators</h3>
 <p>

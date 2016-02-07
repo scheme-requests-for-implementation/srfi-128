@@ -14,7 +14,7 @@
           string-hash string-ci-hash symbol-hash number-hash)
   (export make-default-comparator default-hash comparator-register-default!)
   (export comparator-test-type comparator-check-type comparator-hash)
-  (export %salt% hash-bound hash-salt with-hash-salt)
+  (export %salt% hash-bound hash-salt)
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (export comparator-type-test-predicate comparator-equality-predicate
