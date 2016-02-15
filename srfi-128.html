@@ -184,7 +184,7 @@ compared recursively.</li>
 elements using the hash function of <var>element-comparator</var>
 and then hashes them together in an implementation-defined way.</p></li>
 </ul>
-</p><p><code>(make-vector-comparator </code> <em>element-comparator</em> <em>type-test</em> <em>length ref</em> ] ]<code>)</code>
+</p><p><code>(make-vector-comparator </code> <em>element-comparator</em> <em>type-test</em> <em>length ref</em><code>)</code>
 </p>
 <p>
 This procedure returns comparators whose functions behave as follows:
@@ -382,7 +382,15 @@ of <var>comparator</var> and any of the following type test predicates:
 <code>string?</code>, <code>vector?</code>, or
 the type test predicate of a comparator that has already been registered.
 </p>
-<p></p>
+<p>
+This procedure is intended only to extend default comparators into
+territory that would otherwise be undefined, not to override their
+existing behavior.
+In general, the ordering of calls to <code>comparator-register-default!</code>
+should be irrelevant.  However, implementations that support inheritance
+of record types may wish to ensure that default comparators always check
+subtypes before supertypes.
+</p>
 <h3 id="Accessorsandinvokers">Accessors and Invokers</h3>
 <p>
 <code>(comparator-type-test-predicate </code><em>comparator</em><code>)</code>
@@ -450,12 +458,14 @@ The order in which the values are compared is unspecified.
 
 <p>
 It is an error unless &lt;comparator&gt; evaluates to a comparator
-and &lt;object<sub>1</sub> and &lt;object<sub>2</sub>&gt; evaluate to
-objects that the comparator can handle.  If the ordering predicate returns
-<code>#t</code>, &lt;less-than&gt; is evaluated and its value returned.
-If the equality predicate returns <code>#t</code>, &lt;equal-to&gt;
-is evaluated and its value returned.  If neither is true,
-&lt;greater-than&gt; is evaluated and its value returned.
+and &lt;object<sub>1</sub>&gt; and &lt;object<sub>2</sub>&gt; evaluate
+to objects that the comparator can handle.  If the ordering predicate
+returns true when applied to the values of
+&lt;object<sub>1</sub>&gt; and &lt;object<sub>2</sub>&gt; in
+that order, then &lt;less-than&gt; is evaluated and its value returned.
+If the equality predicate returns true when applied in the same way,
+then &lt;equal-to&gt; is evaluated and its value returned.  If neither
+returns true, &lt;greater-than&gt; is evaluated and its value returned.
 </p>
 <p>If &lt;comparator&gt; is omitted, a default comparator is used.</p>
 
