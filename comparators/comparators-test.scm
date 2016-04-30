@@ -250,7 +250,7 @@
     (test-assert (exact-integer? (hash-bound)))
     (test-assert (exact-integer? (hash-salt)))
     (test-assert (< (hash-salt) (hash-bound)))
-    (test (hash-salt) (fake-salt-hash #t))
+    ;(test (hash-salt) (fake-salt-hash #t))
   ) ; end comparators/bound-salt
 
 ) ; end comparators
