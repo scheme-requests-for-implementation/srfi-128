@@ -1,6 +1,6 @@
 (use test)
-(use comparators)
-(load "r7rs-shim.scm")
+(use srfi-128)
+(load "../comparators/r7rs-shim.scm")
 
 (define (print x) (display x) (newline))
 
