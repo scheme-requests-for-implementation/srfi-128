@@ -2,7 +2,7 @@
  (safe-globals)
  (specialize))
 
-(module comparators ()
+(module srfi-128 ()
   (import scheme)
   (import (only chicken use export include case-lambda error define-record-type
            make-parameter parameterize : define-type))
@@ -18,7 +18,7 @@
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (export comparator-type-test-predicate comparator-equality-predicate
-	  comparator-ordering-predicate comparator-hash-function)
+    comparator-ordering-predicate comparator-hash-function)
   (use numbers)
   (use srfi-4)
   (use srfi-13)
@@ -27,9 +27,9 @@
   (define-type :comparison-test: (procedure (* *) boolean))
   (define-type :hash-code: fixnum)
   (define-type :hash-function: (procedure (*) :hash-code:))
-  (include "r7rs-shim.scm")
-  (include "comparators-impl.scm")
-  (include "default.scm")
+  (include "comparators/r7rs-shim.scm")
+  (include "comparators/comparators-impl.scm")
+  (include "comparators/default.scm")
   ;; Chicken type declarations
   (: comparator? (* --> boolean : :comparator:))
   (: comparator-type-test-predicate (:comparator: --> :type-test:))
