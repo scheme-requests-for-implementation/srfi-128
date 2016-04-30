@@ -2,4 +2,5 @@
 *.swp
 *.import.scm
 *.so
+*.types
 salmonella.log
