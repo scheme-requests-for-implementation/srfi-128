@@ -1,0 +1,21 @@
+;; -*- Hen -*-
+
+((egg "srfi-128.egg")
+ ; List of files that should be bundled alongside egg
+ (files "comparators"
+        "tests"
+        "srfi-128.setup"
+        "srfi-128.meta"
+        "srfi-128.release-info"
+        "LICENSE"
+        "README.md")
+
+ (license "BSD")
+ (category data)
+ (depends numbers)
+ (test-depends test)
+ (author "John Cowan, Egg by Jörg F. Wittenberger / Jeremy Steward")
+ (synopsis "SRFI-128: Comparators (reduced)")
+ (email "cowan@ccil.org")
+ (repo "https://github.com/scheme-requests-for-implementation/srfi-128")
+ (version "0.1"))
