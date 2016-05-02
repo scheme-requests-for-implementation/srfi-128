@@ -1,7 +1,7 @@
 ;; -*- Hen -*-
 
 (compile -O3 -d2 -s -J -emit-type-file "srfi-128.types" "comparators/comparators.scm")
-(compile -O3 -d0 -s -J "comparators/comparators.scm" -J -o srfi-128.so)
+(compile -O3 -d0 -s -J "comparators/comparators.scm" -o srfi-128.so)
 (compile -s -O2 -d0 "srfi-128.import.scm")
 
 (install-extension
