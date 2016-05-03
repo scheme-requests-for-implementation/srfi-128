@@ -1,10 +1,13 @@
 ;; -*- Hen -*-
 
+(define (dynld-name fn)
+  (make-pathname #f fn ##sys#load-dynamic-extension))
+
 (compile -O3 -d2 -s -J -emit-type-file "srfi-128.types" "comparators/comparators.scm")
-(compile -O3 -d0 -s "comparators/comparators.scm" -unit srfi-128)
+(compile -O3 -d0 -s -J "comparators/comparators.scm" -o srfi-128.so)
 (compile -s -O2 -d0 "srfi-128.import.scm")
 
 (install-extension
  'srfi-128
- '("srfi-128.types" "srfi-128.so" "srfi-128.import.so")
- '((version "0.1")))
+ `("srfi-128.types" ,(dynld-name "srfi-128") ,(dynld-name "srfi-128.import"))
+ '((version "0.2")))
