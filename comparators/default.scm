@@ -102,8 +102,8 @@
   (let ((a-type (object-type a))
         (b-type (object-type b)))
     (cond
-      ((< a-type b-type) -1)
-      ((> a-type b-type) 1)
+      ((< a-type b-type) #t)
+      ((> a-type b-type) #f)
       (else (dispatch-ordering a-type a b)))))
 
 (define (default-equality a b)
