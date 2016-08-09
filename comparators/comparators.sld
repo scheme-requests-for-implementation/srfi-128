@@ -1,4 +1,4 @@
-(define-library comparators
+(define-library (comparators)
   (import (scheme base))
   (import (scheme case-lambda))
   (export comparator? comparator-ordered? comparator-hashable?)
