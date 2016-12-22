@@ -1,6 +1,7 @@
 (define-library (comparators)
   (import (scheme base))
   (import (scheme case-lambda))
+  (import (scheme char) (scheme complex) (scheme inexact))
   (export comparator? comparator-ordered? comparator-hashable?)
   (export make-comparator
           make-pair-comparator make-list-comparator make-vector-comparator
