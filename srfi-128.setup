@@ -10,4 +10,4 @@
 (install-extension
  'srfi-128
  `("srfi-128.types" ,(dynld-name "srfi-128") ,(dynld-name "srfi-128.import"))
- '((version "0.6")))
+ '((version "0.7")))
