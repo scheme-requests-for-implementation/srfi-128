@@ -276,7 +276,7 @@
           (elem<? (comparator-ordering-predicate element-comparator)))
       (let loop ((a a) (b b))
         (cond
-          ((and (empty? a) (empty? b) #f))
+          ((and (empty? a) (empty? b)) #f)
           ((empty? a) #t)
           ((empty? b) #f)
           ((elem=? (head a) (head b)) (loop (tail a) (tail b)))
