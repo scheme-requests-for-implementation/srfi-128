@@ -10,7 +10,7 @@ See also [[https://srfi.schemers.org/srfi-114/][SRFI 114: Comparators]].
 
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-128/srfi-128.html][SRFI Document]].
 
-If you'd like to participate in the discussion of this SRFI, or report issues with it, please [[shttp://srfi.schemers.org/srfi-128/][join the SRFI-128 mailing list]] and send your message there.
+If you'd like to participate in the discussion of this SRFI, or report issues with it, please [[https://srfi.schemers.org/srfi-128/][join the SRFI-128 mailing list]] and send your message there.
 
 Thank you.
 
