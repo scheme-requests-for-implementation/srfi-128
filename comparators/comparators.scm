@@ -4,9 +4,14 @@
 
 (module srfi-128 ()
   (import scheme)
-  (import (chicken type))
-  (import (chicken base))
-  (import (chicken module))
+  (cond-expand
+   (chicken-5
+    (import (chicken type))
+    (import (chicken base))
+    (import (chicken module)))
+   (else
+    (import (only chicken use export include case-lambda error define-record-type
+		  make-parameter parameterize : define-type))))
   (export comparator? comparator-ordered? comparator-hashable?)
   (export make-comparator
           make-pair-comparator make-list-comparator make-vector-comparator
@@ -20,8 +25,15 @@
   (export comparator-if<=>)
   (export comparator-type-test-predicate comparator-equality-predicate
     comparator-ordering-predicate comparator-hash-function)
-  (import srfi-4)
-  (import (except srfi-13 string-hash)) ;; That's odd, why is it redefined?
+  (cond-expand
+   (chicken-5
+    (import srfi-4)
+    (import (except srfi-13 string-hash)) ;; That's odd, why is it redefined?
+    )
+   (else
+    (use numbers)
+    (use srfi-4)
+    (use srfi-13)))
   (define-type :comparator: (struct comparator))
   (define-type :type-test: (procedure (*) boolean))
   (define-type :comparison-test: (procedure (* *) boolean))
