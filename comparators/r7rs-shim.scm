@@ -22,6 +22,8 @@
 
 (define exact inexact->exact)
 
+; (define (exact-integer? x) (and (integer? x) (exact? x)))
+
 (define bytevector? u8vector?)
 
 (define bytevector-length u8vector-length)
@@ -34,10 +36,8 @@
 
 (define string-foldcase string-downcase)
 
-(cond-expand
-  (chicken-4
-    (define (infinite? x) (or (= x +inf.0) (= x -inf.0)))
+;; (define (infinite? x) (or (= x +inf.0) (= x -inf.0)))
 
-    (define (nan? x) (not (= x x)))
+;; (define (nan? x) (not (= x x)))
 
-    (define (exact-integer? obj) (and (integer? obj) (exact? obj)))))
+;; (define (exact-integer? obj) (and (integer? obj) (exact? obj)))
