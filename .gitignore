@@ -3,4 +3,8 @@
 *.import.scm
 *.so
 *.types
+*.build.sh
+*.install.sh
+*.link
+*.o
 salmonella.log

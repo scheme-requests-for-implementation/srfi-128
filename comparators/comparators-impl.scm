@@ -264,7 +264,7 @@
     (let ((elem=? (comparator-equality-predicate element-comparator)))
       (let loop ((a a) (b b))
         (cond
-          ((and (empty? a) (empty? b) #t))
+          ((and (empty? a) (empty? b)) #t)
           ((empty? a) #f)
           ((empty? b) #f)
           ((elem=? (head a) (head b)) (loop (tail a) (tail b)))

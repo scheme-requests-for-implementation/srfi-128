@@ -4,8 +4,21 @@
 
 (module srfi-128 ()
   (import scheme)
-  (import (only chicken use export include case-lambda error define-record-type
-           make-parameter parameterize : define-type))
+  (cond-expand
+   (chicken-5
+    (import (chicken base))
+    (import (chicken type))
+    (import (chicken module))
+    (import srfi-4)
+    ;; FIXME: why is string-hash redefined?
+    (import (except srfi-13 string-hash)))
+   (else
+    (import (only chicken use export include case-lambda error define-record-type
+                  make-parameter parameterize : define-type))
+    (use numbers)
+    (use srfi-4)
+    (use srfi-13)))
+
   (export comparator? comparator-ordered? comparator-hashable?)
   (export make-comparator
           make-pair-comparator make-list-comparator make-vector-comparator
@@ -18,18 +31,18 @@
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (export comparator-type-test-predicate comparator-equality-predicate
-    comparator-ordering-predicate comparator-hash-function)
-  (use numbers)
-  (use srfi-4)
-  (use srfi-13)
+          comparator-ordering-predicate comparator-hash-function)
+
   (define-type :comparator: (struct comparator))
   (define-type :type-test: (procedure (*) boolean))
   (define-type :comparison-test: (procedure (* *) boolean))
   (define-type :hash-code: fixnum)
   (define-type :hash-function: (procedure (*) :hash-code:))
+
   (include "comparators/r7rs-shim.scm")
   (include "comparators/comparators-impl.scm")
   (include "comparators/default.scm")
+
   ;; Chicken type declarations
   (: comparator? (* --> boolean : :comparator:))
   (: comparator-type-test-predicate (:comparator: --> :type-test:))
