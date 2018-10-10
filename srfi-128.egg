@@ -1,7 +1,7 @@
 ;; -*- Hen -*-
 
 ((synopsis "SRFI-128: Comparators (reduced)")
- (version "0.7")
+ (version "0.9")
  (license "BSD")
  (category data)
  (dependencies srfi-13)

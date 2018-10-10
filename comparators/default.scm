@@ -97,7 +97,7 @@
                              bytevector? bytevector-length bytevector-u8-ref) obj))
     ; Add more here
     (else (comparator-hash (registered-comparator (object-type obj)) obj))))
-  
+
 (define (default-ordering a b)
   (let ((a-type (object-type a))
         (b-type (object-type b)))
@@ -117,4 +117,3 @@
     default-equality
     default-ordering
     default-hash))
-

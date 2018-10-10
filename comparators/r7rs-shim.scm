@@ -35,9 +35,8 @@
 (define string-foldcase string-downcase)
 
 (cond-expand
-  (chicken-4
+  (chicken-5)
+  (else
     (define (infinite? x) (or (= x +inf.0) (= x -inf.0)))
-
     (define (nan? x) (not (= x x)))
-
     (define (exact-integer? obj) (and (integer? obj) (exact? obj)))))

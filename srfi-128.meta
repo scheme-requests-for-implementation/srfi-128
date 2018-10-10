@@ -9,6 +9,8 @@
         "comparators/r7rs-shim.scm"
         "comparators/complex-shim.scm"
         "tests/run.scm"
+        "srfi-128.egg"
+        "srfi-128.scm"
         "srfi-128.setup"
         "srfi-128.meta"
         "srfi-128.release-info"
