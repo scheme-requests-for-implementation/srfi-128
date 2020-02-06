@@ -6,7 +6,7 @@ This repository hosts [[https://srfi.schemers.org/srfi-128/][SRFI 128]]: Compara
 
 This SRFI is in /final/ status.
 
-See also [[https://srfi.schemers.org/srfi-114/][SRFI 114: Comparators]].
+See also [[https://srfi.schemers.org/srfi-114/][SRFI 114: Comparators]] and [[https://srfi.schemers.org/srfi-162/][SRFI 162: Comparators sublibrary]].
 
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-128/srfi-128.html][SRFI Document]].
 
