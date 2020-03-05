@@ -17,7 +17,7 @@ John Cowan
 
 <h1>Status</h1>
 
-<p>This SRFI is currently in <em>final</em> status. Here is <a href="http://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+128+at+srfi+dotschemers+dot+org">srfi-128@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="http://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="http://srfi-email.schemers.org/srfi-128">archive</a>.</p>
+<p>This SRFI is currently in <em>final</em> status. Here is <a href="https://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+128+at+srfi+dotschemers+dot+org">srfi-128@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="http://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="https://srfi-email.schemers.org/srfi-128">archive</a>.</p>
 <ul>
   <li>Received: 2015-10-26</li>
   <li>60-day deadline: 2015-12-25</li>
@@ -63,7 +63,7 @@ None at present.
 <p>
 The four procedures above have complex dependencies on one another, and it is inconvenient to have to pass them individually to other procedures that might or might not make use of all of them.  For example, a set implementation by its nature requires only an equality predicate, but if it is implemented using a hash table, an appropriate hash function is also required if the implementation does not provide one; alternatively, if it is implemented using a tree, procedures specifying a total order are required.  By passing a comparator rather than a bare equality predicate, the set implementation can make use of whatever procedures are available and useful to it.
 </p>
-<p>This SRFI is a simplified and enhanced rewrite of <a href="http://srfi.schemers.org/srfi-114/srfi-114.html" target="_blank">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized
+<p>This SRFI is a simplified and enhanced rewrite of <a href="https://srfi.schemers.org/srfi-114/srfi-114.html" target="_blank">SRFI 114</a>, and shares some of its design rationale and all of its acknowledgements.  The largest change is the replacement of the comparison procedure with the ordering procedure.  This allowed most of the special-purpose comparators to be removed.  In addition, many of the more specialized
 procedures, as well as all but one of the syntax forms, have been removed as unnecessary.</p>
 
 <p>Special thanks to Taylan Ulrich Bayırlı/Kammer, whose insistence
@@ -267,7 +267,7 @@ does so) and NaNs.</p>
 passing to <code>make-comparator</code>.  Users may write their own
 hash functions with the same signature.  However, if programmers wish their hash
 functions to be backward compatible with the reference implementation
-of <a href="http://srfi.schemers.org/srfi-69/srfi-69.html">SRFI 69</a>,
+of <a href="https://srfi.schemers.org/srfi-69/srfi-69.html">SRFI 69</a>,
 they are advised to write their hash functions to accept a second argument
 and ignore it.
 </p>
@@ -488,7 +488,7 @@ returns true, &lt;greater-than&gt; is evaluated and its value returned.
 is found in the repository of this SRFI.  It contains the following files.</p>
 <ul><li><code>comparators-impl.scm</code> - the record type definition and most of the procedures</li>
 <li><code>default.scm</code> - a simple implementation of the default constructor, which should be improved by implementers to handle records and implementation-specific types</li>
-<li><code>r7rs-shim.scm</code> - procedures for R7RS compatibility, including a trivial implementation of bytevectors on top of <a href="http://srfi.schemers.org/srfi-4/srfi-4.html" target="_blank">SRFI 4</a> u8vectors</li>
+<li><code>r7rs-shim.scm</code> - procedures for R7RS compatibility, including a trivial implementation of bytevectors on top of <a href="https://srfi.schemers.org/srfi-4/srfi-4.html" target="_blank">SRFI 4</a> u8vectors</li>
 <li><code>complex-shim.scm</code> - a trivial implementation of <code>real-part</code> and <code>imag-part</code> for Schemes that don't have complex numbers</li>
 <li><code>comparators.meta</code> - Chicken-specific metadata</li>
 <li><code>comparators.setup</code> - Chicken-specific executable setup</li>
