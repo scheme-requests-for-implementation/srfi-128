@@ -1,11 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
   <head>
     <title>SRFI 128: Comparators (reduced)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/srfi.css" type="text/css" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body>
-  <div>
 
 <h1>Title</h1>
 
@@ -51,7 +50,7 @@ John Cowan
 <p id="pfn2"><b>Post-finalization note #2</b>: After finalization, on
   2021-06-03, the author requested the addition of a non-normative
   recommendation in the description of
-  <code>comparator-register-default!</code></a>.  See the
+  <code>comparator-register-default!</code>.  See the
   <a href="#comparator-register-default-recommendation">third
     paragraph</a>.</p>
 
@@ -117,8 +116,7 @@ It is also the programmer's responsibility to ensure that all four procedures pr
 <li><p><a href="#Comparisonpredicates">Comparison predicates</a>: <code>=? &lt;? &gt;? &lt;=? &gt;=?</code></p></li>
 <li><p><a href="#Syntax">Syntax</a>: <code>comparator-if&lt;=&gt;</code></p></li>
 </ul>
-<a name="Predicates">
-<h3>Predicates</h3>
+<h3 id="Predicates">Predicates</h3>
 <p>
 <code>(comparator? </code><em>obj</em><code>)</code>
 </p>
@@ -162,9 +160,9 @@ Returns a comparator which bundles the <em>type-test, equality, ordering</em>, a
 if the car satisfies the type test predicate of <var>car-comparator</var>, and the
 cdr satisfies the type test predicate of <var>cdr-comparator</var>.
 </p></li>
-<p><li>The equality function returns <code>#t</code> if the cars are equal
+<li>The equality function returns <code>#t</code> if the cars are equal
 according to <var>car-comparator</var> and the cdrs are equal according
-to <var>cdr-comparator</var>, and <code>#f</code> otherwise.</p></li>
+to <var>cdr-comparator</var>, and <code>#f</code> otherwise.</li>
 <li><p>The ordering function first compares the cars of its pairs using
 the equality predicate of <var>car-comparator</var>.  If they are
 not equal, then the ordering predicate of <var>car-comparator</var> is
@@ -173,13 +171,12 @@ Otherwise, the predicate compares the cdrs using
 the equality predicate of <var>cdr-comparator</var>.  If they are not
 equal, then the ordering predicate of <var>cdr-comparator</var>
 is applied to the cdrs and its value is returned.</p></li>
-<p><li>The hash function computes the hash values of the
+<li>The hash function computes the hash values of the
 car and the cdr using the hash functions of <var>car-comparator</var>
 and <var>cdr-comparator</var> respectively and then hashes them together
-in an implementation-defined way.</p>
+in an implementation-defined way.
 </ul>
 <code>(make-list-comparator </code> <em>element-comparator</em> <em>type-test empty? head tail</em><code>)</code>
-</p>
 <p>
 This procedure returns comparators whose functions behave as follows:
 </p>
@@ -203,7 +200,7 @@ compared recursively.</li>
 elements using the hash function of <var>element-comparator</var>
 and then hashes them together in an implementation-defined way.</p></li>
 </ul>
-</p><p><code>(make-vector-comparator </code> <em>element-comparator</em> <em>type-test</em> <em>length ref</em><code>)</code>
+<p><code>(make-vector-comparator </code> <em>element-comparator</em> <em>type-test</em> <em>length ref</em><code>)</code>
 </p>
 <p>
 This procedure returns comparators whose functions behave as follows:
@@ -225,14 +222,12 @@ the ordering predicate of <var>element-comparator</var>.  If any pair of element
 returns <code>#t</code>, then that is the result of the list comparator's
 ordering predicate;
 otherwise the result is <code>#f</code>
-<p><li>The hash function computes the hash values of the
+<li>The hash function computes the hash values of the
 elements using the hash function of <var>element-comparator</var>
-and then hashes them together in an implementation-defined way.</p></li>
+and then hashes them together in an implementation-defined way.</li>
 
 </ul>
-<p>
-</p>
-<dl><dd>
+
 <p>Here is an example, which returns a comparator for byte vectors:</p>
 <pre>(make-vector-comparator
   (make-comparator exact-integer? = &lt; number-hash)
@@ -240,7 +235,6 @@ and then hashes them together in an implementation-defined way.</p></li>
   bytevector-length
   bytevector-u8-ref)
 </pre>
-</dd></dl>
 
 <p>
 <code>(make-eq-comparator)</code>
@@ -258,8 +252,8 @@ These procedures return comparators whose functions behave as follows:
 <ul>
 <li><p>The type test returns <code>#t</code> in all cases.
 </p></li>
-<p><li>The equality functions are <code>eq?</code>, <code>eqv?</code>,
-and <code>equal?</code> respectively.</p></li>
+<li>The equality functions are <code>eq?</code>, <code>eqv?</code>,
+and <code>equal?</code> respectively.</li>
 <li><p>The ordering function is implementation-defined,
 except that it must conform to the rules for ordering functions.
 It may signal an error instead.</p></li>
@@ -367,7 +361,7 @@ Returns a comparator known as a <var>default comparator</var> that accepts Schem
 <li><p>When comparing strings, it must use <code>string=?</code> and <code>string&lt;?</code>.</p><p>Note: In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order on Unicode codepoint order; in R7RS it is an implementation-defined order.</p></li>
 <li><p>When comparing vectors, it must behave the same as a comparator returned by <code>(make-vector-comparator (make-default-comparator) vector? vector-length vector-ref)</code>.</p></li>
 <li><p>When comparing members of types registered with <code>comparator-register-default!</code>, it must behave in the same way as the comparator registered using that function.</p></li>
-</li></ul>
+</ul>
 <p>Default comparators use <code>default-hash</code> as their hash function.</p>
 
 <p>
@@ -412,7 +406,7 @@ subtypes before supertypes.
 </p>
 
 <p id="comparator-register-default-recommendation">This SRFI
-recommends (but does not require) that libraries which 
+recommends (but does not require) that libraries which
 expose comparators do <i>not</i> register them with this procedure,
 because the default comparator (which is meant mostly for ad hoc
 programming) is meant to be under the control of the program author
@@ -441,21 +435,18 @@ conflict with each other.</p>
 <p>
 Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and returns what it returns.
 More convenient than <code>comparator-type-test-predicate</code>, but less efficient when the predicate is called repeatedly.</p>
-</p>
 <p>
 <code>(comparator-check-type </code><em>comparator obj</em><code>)</code>
 </p>
 <p>
 Invokes the type test predicate of <em>comparator</em> on <em>obj</em> and returns true if it returns true, but signals an error otherwise.
 More convenient than <code>comparator-type-test-predicate</code>, but less efficient when the predicate is called repeatedly.</p>
-</p>
 <p>
 <code>(comparator-hash </code><em>comparator obj</em><code>)</code>
 </p>
 <p>
 Invokes the hash function of <em>comparator</em> on <var>obj</var> and returns what it returns.
 More convenient than <code>comparator-hash-function</code>, but less efficient when the function is called repeatedly.</p>
-</p>
 <p>Note: No invokers are required for the equality and ordering predicates,
 because <code>=?</code> and <code>&lt;?</code> serve this function.
 </p>
