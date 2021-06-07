@@ -43,10 +43,18 @@ John Cowan
 	section.)</li></ul></li>
 </ul>
 
-<p><b>Post-finalization note</b>:  Because of the extremely high cost of
+<p id="pfn1"><b>Post-finalization note #1</b>: Because of the extremely high cost of
     conforming to the first and third conditions of <code>default-hash</code>,
     implementers may disregard those conditions and examine only a
     bounded portion of the argument.</p>
+
+<p id="pfn2"><b>Post-finalization note #2</b>: After finalization, on
+  2021-06-03, the author requested the addition of a non-normative
+  recommendation in the description of
+  <code>comparator-register-default!</code></a>.  See the
+  <a href="#comparator-register-default-recommendation">third
+    paragraph</a>.</p>
+
 <h1>Abstract</h1>
 
 <p>
@@ -402,6 +410,16 @@ should be irrelevant.  However, implementations that support inheritance
 of record types may wish to ensure that default comparators always check
 subtypes before supertypes.
 </p>
+
+<p id="comparator-register-default-recommendation">This SRFI
+recommends (but does not require) that libraries which 
+expose comparators do <i>not</i> register them with this procedure,
+because the default comparator (which is meant mostly for ad hoc
+programming) is meant to be under the control of the program author
+rather than the library author.  It is the program author's
+responsibility to ensure that the registered comparators do not
+conflict with each other.</p>
+
 <h3 id="Accessorsandinvokers">Accessors and Invokers</h3>
 <p>
 <code>(comparator-type-test-predicate </code><em>comparator</em><code>)</code>
@@ -518,4 +536,4 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
     </p><hr>
-    <address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org" target="_blank">Arthur A. Gleckler</a></address></div>
+    <address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org" target="_blank">Arthur A. Gleckler</a></address>
