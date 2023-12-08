@@ -1,3 +1,7 @@
+;;; SPDX-FileCopyrightText: 2015 John Cowan <cowan@ccil.org>
+;;;
+;;; SPDX-License-Identifier: MIT
+
 (use test)
 (use srfi-128)
 (load "../comparators/r7rs-shim.scm")

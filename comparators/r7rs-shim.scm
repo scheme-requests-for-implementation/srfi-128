@@ -1,3 +1,7 @@
+;;; SPDX-FileCopyrightText: 2015 John Cowan <cowan@ccil.org>
+;;;
+;;; SPDX-License-Identifier: MIT
+
 ;;;; Simple shim for R7RS procedures not in R5RS
 
 ;;; Depends on SRFI 4 implementation
