@@ -1,3 +1,7 @@
+;;; SPDX-FileCopyrightText: 2015 John Cowan <cowan@ccil.org>
+;;;
+;;; SPDX-License-Identifier: MIT
+
 (define-library (comparators)
   (import (scheme base))
   (import (scheme case-lambda))

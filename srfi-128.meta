@@ -1,4 +1,7 @@
 ;; -*- Hen -*-
+;;; SPDX-FileCopyrightText: 2016 Jeremy Steward <jeremy@thatgeoguy.ca>
+;;;
+;;; SPDX-License-Identifier: MIT
 
 ((egg "srfi-128.egg")
  ; List of files that should be bundled alongside egg

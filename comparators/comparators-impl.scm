@@ -1,3 +1,5 @@
+;;; SPDX-License-Identifier: MIT
+;;;
 ;;; Copyright (C) John Cowan (2015). All Rights Reserved.
 ;;; 
 ;;; Permission is hereby granted, free of charge, to any person

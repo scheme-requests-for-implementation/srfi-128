@@ -1,3 +1,7 @@
+;;; SPDX-FileCopyrightText: 2015 John Cowan <cowan@ccil.org>
+;;;
+;;; SPDX-License-Identifier: MIT
+
 ;;;; Dummy versions of real-part and imag-part
 
 ;;; Include this file if your Scheme doesn't support real-part

@@ -1,4 +1,7 @@
 ;; -*- Hen -*-
+;;; SPDX-FileCopyrightText: 2016 Jeremy Steward <jeremy@thatgeoguy.ca>
+;;;
+;;; SPDX-License-Identifier: MIT
 
 (define (dynld-name fn)
   (make-pathname #f fn ##sys#load-dynamic-extension))
