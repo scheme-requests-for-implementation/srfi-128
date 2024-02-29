@@ -156,7 +156,7 @@ Returns a comparator which bundles the <em>type-test, equality, ordering</em>, a
 </p><p>
 </p><ul>
 <li><p><code>(make-comparator boolean? boolean=? (lambda (x y) (and (not x) y)) boolean-hash)</code> will return a comparator for booleans, expressing the ordering <code>#f</code> &lt; <code>#t</code> and the standard hash function for booleans.</p></li>
-<li><p><code>(make-comparator real? = &lt; (lambda (x) (exact (abs x))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
+<li><p><code>(make-comparator real? = &lt; (lambda (x) (exact (floor (abs x)))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
 <li><p><code>(make-comparator string? string=? string&lt;? string-hash)</code> will return a comparator expressing the implementation's ordering of strings and the standard hash function.</p></li>
 <li><p><code>(make-comparator string? string-ci=? string-ci&lt;? string-ci-hash</code> will return a comparator expressing the implementation's case-insensitive ordering of strings and the standard case-insensitive hash function.</p></li>
 </ul>
