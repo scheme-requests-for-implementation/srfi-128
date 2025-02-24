@@ -155,7 +155,7 @@ in a comparator are likewise pure and functional.
 Returns a comparator which bundles the <em>type-test, equality, ordering</em>, and <em>hash</em> procedures provided.  However, if <em>ordering</em> or <em>hash</em> is <code>#f</code>, a procedure is provided that signals an error on application.  The predicates <code>comparator-ordered?</code> and/or <code>comparator-hashable?</code>, respectively, will return <code>#f</code> in these cases.
 </p>
 <p>Here are calls on <code>make-comparator</code> that will return useful comparators for standard Scheme types:
-</p><p>
+
 </p><ul>
 <li><p><code>(make-comparator boolean? boolean=? (lambda (x y) (and (not x) y)) boolean-hash)</code> will return a comparator for booleans, expressing the ordering <code>#f</code> &lt; <code>#t</code> and the standard hash function for booleans.</p></li>
 <li id="erratum-floor"><p><code>(make-comparator real? = &lt; (lambda (x) (exact (floor (abs x)))))</code> will return a comparator expressing the natural ordering of real numbers and a plausible (but not optimal) hash function.</p></li>
@@ -256,7 +256,6 @@ and then hashes them together in an implementation-defined way.</li>
 <p>
 <code>(make-equal-comparator)</code>
 </p>
-<p>
 <p>
 These procedures return comparators whose functions behave as follows:
 </p>
