@@ -45,7 +45,8 @@ John Cowan
       <li>2021-03-29 (Fix arguments to <code>make-comparator</code> in
 	the <a href="#Defaultcomparators">Default comparators</a>
 	section.)</li>
-      <li>2024-03-01 (Fix <a href="#erratum-floor">example</a>.)</li></ul></li>
+      <li>2024-03-01 (Fix <a href="#erratum-floor">example</a>.)</li>
+      <li>2025-02-24 (Fix <a href="#bytevector-comparator">bytevector comparator</a>.)</li></ul></li>
 </ul>
 
 <p id="pfn1"><b>Post-finalization note #1</b>: Because of the extremely high cost of
@@ -365,7 +366,7 @@ Returns a comparator known as a <var>default comparator</var> that accepts Schem
 <li><p>When comparing characters, it must use <code>char=?</code> and <code>char&lt;?</code>.</p><p>Note: In R5RS, this is an implementation-dependent order that is typically the same as Unicode codepoint order; in R6RS and R7RS, it is Unicode codepoint order.</p></li>
 <li><p>When comparing pairs, it must behave the same as a comparator returned by <code>make-pair-comparator</code> with default comparators as arguments.</p></li>
 <li><p>When comparing symbols, it must use an implementation-dependent total order.  One possibility is to use the order obtained by applying <code>symbol-&gt;string</code> to the symbols and comparing them using the total order implied by <code>string&lt;?</code>.</p></li>
-<li><p>When comparing bytevectors, it must behave the same as a comparator created by the expression <code>(make-vector-comparator (make-comparator bytevector? = &lt; number-hash) bytevector? bytevector-length bytevector-u8-ref)</code>.</p></li>
+<li id="bytevector-comparator"><p>When comparing bytevectors, it must behave the same as a comparator created by the expression <code>(make-vector-comparator (make-comparator exact-integer? = &lt; number-hash) bytevector? bytevector-length bytevector-u8-ref)</code>.</p></li>
 <li><p>When comparing numbers where either number is complex, since non-real numbers cannot be compared with <code>&lt;</code>, the following least-surprising ordering is defined: If the real parts are &lt; or &gt;, so are the numbers; otherwise, the numbers are ordered by their imaginary parts.  This can still produce somewhat surprising results if one real part is exact and the other is inexact.</p></li>
 <li><p>When comparing real numbers, it must use <code>=</code> and <code>&lt;</code>.</p></li>
 <li><p>When comparing strings, it must use <code>string=?</code> and <code>string&lt;?</code>.</p><p>Note: In R5RS, this is lexicographic order on the implementation-dependent order defined by <code>char&lt;?</code>; in R6RS it is lexicographic order on Unicode codepoint order; in R7RS it is an implementation-defined order.</p></li>
